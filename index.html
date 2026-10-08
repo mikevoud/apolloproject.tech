@@ -1,0 +1,2658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apollo Project - Home Dashboard</title>
+    <style>
+        /* Βασικές μεταβλητές χρωμάτων (Κανονικό Θέμα) */
+        :root {
+            --bg-color: #f4f6f9;
+            --text-color: #333;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --card-text: #555;
+            --border-color: rgba(226, 232, 240, 0.8);
+            --header-gradient: linear-gradient(135deg, #16375e 0%, #235a99 100%);
+            --victron-orange: #ff7420;
+            --victron-blue: #235a99;
+
+            /* ΣΤΑΘΕΡΑ ΧΡΩΜΑΤΑ SIDEBAR (RAL 5012) */
+            --sidebar-bg: #3b8ebb;
+            --sidebar-hover: #235a99;
+            --sidebar-active: #16375e;
+            --sidebar-text: #e2e8f0;
+            /* Λευκό/Γκρι κείμενο στο κανονικό mode */
+            --glass-blur: blur(12px);
+        }
+
+        /* Μεταβλητές χρωμάτων για το Night Mode */
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-text: #cbd5e1;
+            --border-color: rgba(51, 65, 85, 0.5);
+            --header-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --victron-blue: #38bdf8;
+
+            /* Η Sidebar παραμένει RAL 5012 στο Night Mode */
+            --sidebar-bg: #3b8ebb;
+            --sidebar-hover: #235a99;
+            --sidebar-active: #16375e;
+
+            /* ΑΛΛΑΓΗ: Η γραμματοσειρά γίνεται μπλε όπως το φόντο του τίτλου */
+            --sidebar-text: #16375e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            margin-left: calc(260px + 2ch);
+            transition: background-color 0.3s, color 0.3s, margin-left 0.3s;
+        }
+
+        header {
+            background: var(--header-gradient);
+            color: var(--victron-blue);
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--victron-orange);
+        }
+
+        header h1 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            font-size: 3.8em;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #e0f2fe !important;
+        }
+
+        header p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 12px 0 0;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #e0f2fe !important;
+            opacity: 0.95;
+        }
+
+        [data-theme="dark"] header h1,
+        [data-theme="dark"] header p,
+        [data-theme="dark"] .theme-toggle-inline {
+            color: var(--victron-blue) !important;
+        }
+
+        /* ΜΠΑΡΕΣ ΠΡΟΟΔΟΥ ΚΑΙ ENOTHTEΣ */
+        .progress-section {
+            max-width: 1400px;
+            margin: 30px auto 10px auto;
+            padding: 0 20px;
+        }
+
+        .progress-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .progress-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: 'Segoe UI', sans-serif !important;
+            font-size: 1.6em !important;
+            font-weight: 700 !important;
+            color: var(--victron-orange) !important;
+        }
+
+        .progress-container-bar {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 10px;
+            height: 16px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--victron-orange);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .card-progress-wrapper {
+            margin-top: 15px;
+        }
+
+        .card-progress-bar-container {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 6px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .card-progress-bar-fill {
+            height: 100%;
+            background-color: var(--victron-orange);
+            width: 0%;
+            transition: width 0.4s ease-out;
+        }
+
+        .card-progress-text {
+            display: block;
+            text-align: right;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: var(--victron-orange);
+            margin-top: 4px;
+        }
+
+        /* ΠΛΑΪΝΗ ΜΠΑΡΑ (SIDEBAR STYLE) */
+        .sidebar {
+            height: 100%;
+            width: 260px;
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            background-color: var(--sidebar-bg);
+            overflow-x: hidden;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, background-color 0.3s;
+        }
+
+        .menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+        }
+
+        .sidebar-title {
+            color: var(--victron-orange);
+            padding: 10px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            padding: 12px 25px;
+            text-decoration: none;
+            font-size: 0.95em;
+            color: var(--sidebar-text);
+            display: inline-flex;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            transition: 0.2s, background-color 0.3s, color 0.2s;
+            white-space: nowrap;
+        }
+
+        .sidebar a svg {
+            fill: currentColor;
+        }
+
+        .sidebar a:hover {
+            background-color: var(--sidebar-hover);
+            color: #fff !important;
+            padding-left: 35px;
+        }
+
+        .sidebar a.active {
+            border-left: 4px solid var(--victron-orange);
+            background-color: var(--sidebar-active);
+        }
+
+        /* ΔΙΑΚΟΠΤΗΣ ΚΑΙ SLIDER */
+        .theme-toggle-row {
+            padding: 15px 25px;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+            /* Σπρώχνει το toggle τέρμα κάτω στη μπάρα */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #e2e8f0;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 22px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--victron-orange);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        /* BENTO GRID ΚΑΙ ΚΑΡΤΕΣ */
+        .container {
+            max-width: 1400px;
+            margin: 20px auto 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        .grid-item {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--victron-blue);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s;
+        }
+
+        .grid-item.bento-wide {
+            grid-column: span 2;
+        }
+
+        .card-progress-wrapper {
+            margin-top: auto;
+            padding-top: 15px;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-5px);
+            border-left-width: 7px;
+            border-left-color: var(--victron-orange);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .card-title-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .grid-item:hover .card-title-row {
+            transform: translateX(3px);
+        }
+
+        .card-title-row h2 {
+            margin: 0;
+            font-size: 1.4em;
+            color: var(--victron-blue) !important;
+        }
+
+        .card-logo {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+
+        .grid-item p {
+            margin: 0;
+            line-height: 1.6;
+            color: var(--card-text);
+            transition: color 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .grid-item p strong {
+            color: var(--victron-orange);
+        }
+
+        /* HARDWARE CATALOG */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .vault-item {
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+        }
+
+        .vault-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+            background: var(--card-bg);
+        }
+
+        .vault-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .hardware-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .hardware-name {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .hardware-yt-link {
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .hardware-yt-link:hover {
+            transform: scale(1.15);
+        }
+
+        .hardware-caption {
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: var(--card-text);
+        }
+
+        .vault-title {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            font-size: 1.6em !important;
+            font-weight: 700 !important;
+            color: var(--victron-blue) !important;
+            margin: 0;
+        }
+        .component-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--victron-blue) !important;
+    margin: 0 0 20px 0;
+}
+
+        /* ΣΤΥΛ ΓΙΑ ΤΗ ΔΙΠΛΗ ΓΛΩΣΣΑ */
+        .lang-el {
+            display: none;
+        }
+
+        .lang-btn {
+            position: absolute;
+            top: 20px;
+            right: 150px;
+            margin: 0;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: #e2e8f0;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 700;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .lang-btn:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        [data-theme="dark"] .sidebar a.active {
+            color: #e2e8f0 !important;
+        }
+
+        /* --- ΔΥΝΑΜΙΚΟ LIGHTBOX GALLERY --- */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            padding-top: 40px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+        }
+
+        .lightbox-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: auto;
+            padding: 0 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .lightbox-main-img {
+            width: 100%;
+            height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+        }
+
+        .lightbox-close {
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10002;
+            transition: color 0.2s;
+        }
+
+        .lightbox-close:hover {
+            color: var(--victron-orange);
+        }
+
+        .lightbox-prev,
+        .lightbox-next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 16px;
+            margin-top: -50px;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            transition: 0.2s ease;
+            border-radius: 4px;
+            user-select: none;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .lightbox-next {
+            right: 10px;
+        }
+
+        .lightbox-prev {
+            left: 10px;
+        }
+
+        .lightbox-prev:hover,
+        .lightbox-next:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--victron-orange);
+        }
+
+        .lightbox-number {
+            color: #cbd5e1;
+            font-size: 0.85em;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 8px 0;
+            text-align: left;
+        }
+
+        .lightbox-thumbnails-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .lightbox-thumb {
+            opacity: 0.4;
+            width: 70px;
+            height: 50px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 4px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .lightbox-thumb.active-thumb,
+        .lightbox-thumb:hover {
+            opacity: 1;
+            border-color: var(--victron-orange);
+        }
+
+        /* --- RESPONSIVE MEDIA QUERIES ΓΙΑ ΚΙΝΗΤΑ ΚΑΙ ΤΑΜΠΛΕΤ --- */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid-item.bento-wide {
+                grid-column: span 1;
+            }
+
+            .vault-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            body {
+                margin-left: 0;
+                /* Αφαιρείται το μεγάλο περιθώριο στα αριστερά */
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                /* Κρύβεται η sidebar έξω από την οθόνη */
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                /* Εμφανίζεται με slide-in εφέ */
+            }
+
+            .menu-btn {
+                display: block !important;
+                /* Εμφάνιση κουμπιού μενού */
+            }
+
+            header {
+                padding: 60px 20px 30px 20px;
+            }
+
+            header h1 {
+                font-size: 2.2em;
+                /* Μικραίνει ο τίτλος για να χωράει */
+            }
+
+            header p {
+                font-size: 1.2em;
+            }
+
+            .lang-btn {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 15px auto 0 auto;
+                display: inline-block;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .container,
+            .vault-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-label-row {
+                font-size: 1.2em !important;
+            }
+
+            .lightbox-main-img {
+                height: 50vh;
+                /* Λιγότερο ύψος στα κινητά για να μην κρύβει τα thumbnails */
+            }
+
+            .lightbox-prev,
+            .lightbox-next {
+                padding: 10px;
+                font-size: 18px;
+            }
+        }
+        /* Στυλ για το Full Width Πάνελ */
+/* Εξωτερικό Container - Απόλυτα συμβατό με το δικό σας layout */
+.vrm-custom-dashboard {
+    width: 100%;
+    margin: 0 auto 30px auto;
+    padding: 25px;
+    box-sizing: border-box;
+    background: inherit;
+    color: inherit;
+    font-family: inherit;
+}
+
+/* Διαχωριστικοί Τίτλοι Ενοτήτων */
+.vrm-section-divider {
+    margin: 30px 0 15px 0;
+    font-size: 1.1rem;
+    color: #fbbf24; /* Το χρυσό/κίτρινο του Apollo Project */
+    border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+    padding-bottom: 5px;
+}
+
+/* Grid Layout για 4 ή 6 κάρτες ανά σειρά */
+.vrm-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Εσωτερικές Κάρτες */
+.vrm-card {
+    background: rgba(128, 128, 128, 0.07);
+    padding: 15px 20px;
+    border-radius: 6px;
+    border-left: 4px solid #64748b;
+    color: inherit;
+}
+
+.vrm-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: rgba(128, 128, 128, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dark .vrm-card h3, body.dark .vrm-card h3, body.dark-mode .vrm-card h3 {
+    color: #94a3b8;
+}
+
+.vrm-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: inherit;
+}
+
+.vrm-subtext {
+    font-size: 0.8rem;
+    color: rgba(128, 128, 128, 0.7);
+}
+
+.dark .vrm-subtext, body.dark .vrm-subtext, body.dark-mode .vrm-subtext {
+    color: #94a3b8;
+}
+
+/* Χρωματικοί δείκτες αριστερής λωρίδας καρτών */
+.battery-card { border-left-color: #10b981; }
+.solar-card { border-left-color: #fbbf24; }
+.load-card { border-left-color: #ef4444; }
+.grid-card { border-left-color: #a855f7; }
+.temp-card { border-left-color: #06b6d4; }
+.system-card { border-left-color: #3b82f6; }
+.peak-card { border-left-color: #f97316; } /* Πορτοκαλί */
+.battery-efficiency-card { border-left-color: #84cc16; } /* Λαχανί */
+
+.status-online { color: #10b981 !important; }
+
+/* ΠΛΕΓΜΑ ΓΡΑΦΗΜΑΤΩΝ (ΚΑΤΩ ΜΕΡΟΣ) */
+.vrm-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.vrm-chart-box {
+    background: rgba(128, 128, 128, 0.04);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+.vrm-chart-box h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    color: inherit;
+    font-weight: 600;
+}
+
+/* Διαχείριση Γλώσσας */
+html[lang="en"] .lang-el { display: none !important; }
+html[lang="el"] .lang-en { display: none !important; }
+body.en .lang-el { display: none !important; }
+body.el .lang-en { display: none !important; }
+
+@media (max-width: 600px) {
+    .vrm-charts-grid { grid-template-columns: 1fr; }
+}
+
+
+/* ΠΡΟΒΛΕΨΗ ΠΑΡΑΓΩΓΗΣ ΑΝΑ ΠΕΔΙΟ (Open-Meteo) */
+.wx-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.wx-day {
+    background: rgba(128, 128, 128, 0.07);
+    border: 1px solid rgba(128, 128, 128, 0.14);
+    border-radius: 10px;
+    padding: 16px 18px;
+}
+.wx-day-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.wx-day-icon { font-size: 2.1rem; line-height: 1; }
+.wx-day-title { font-weight: 700; font-size: 1.05rem; }
+.wx-day-meta { font-size: 0.78rem; color: rgba(128, 128, 128, 0.95); margin-top: 2px; }
+.wx-field { margin: 12px 0; }
+.wx-field-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.wx-field-name { font-weight: 600; font-size: 0.88rem; }
+.wx-field-sub { font-weight: 400; font-size: 0.72rem; opacity: 0.7; margin-left: 4px; }
+.wx-field-val { font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.wx-bar { height: 8px; border-radius: 6px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin-top: 6px; }
+.wx-bar > span { display: block; height: 100%; border-radius: 6px; }
+.wx-bar.east > span { background: #fbbf24; }
+.wx-bar.west > span { background: #f97316; }
+.wx-total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 14px; padding-top: 10px;
+    border-top: 1px solid rgba(128, 128, 128, 0.25);
+    font-weight: 700;
+}
+.wx-total-val { font-size: 1.25rem; color: var(--victron-orange); font-variant-numeric: tabular-nums; }
+
+/* ===== ΕΝΟΠΟΙΗΜΕΝΟ ΣΤΥΛ ΣΕ ΟΛΗ ΤΗ ΣΕΛΙΔΑ ===== */
+html { scroll-behavior: smooth; }
+::selection { background: var(--victron-orange); color: #fff; }
+a:focus-visible, button:focus-visible, input:focus-visible + .slider {
+    outline: 2px solid var(--victron-orange); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+/* Σωστά χρώματα στο dark mode (το θέμα χρησιμοποιεί data-theme) */
+[data-theme="dark"] .vrm-card h3,
+[data-theme="dark"] .vrm-subtext { color: #94a3b8; }
+
+/* Ενιαίο ύφος με τις κύριες κάρτες */
+.vrm-section-divider { color: var(--victron-orange); font-weight: 700; letter-spacing: 0.3px; }
+.vrm-card {
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    border-left-width: 4px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
+}
+.vrm-card:hover, .wx-day:hover, .vrm-chart-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+.wx-day, .vrm-chart-box { transition: transform 0.25s, box-shadow 0.25s; }
+.vrm-value { font-size: 1.7rem; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
+.vrm-chart-box { border-radius: 12px; }
+
+/* Μπάρα φόρτισης μπαταρίας */
+.soc-bar { height: 8px; border-radius: 6px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin: 8px 0 6px; }
+.soc-bar > span { display: block; height: 100%; width: 0; border-radius: 6px; background: #10b981; transition: width 0.6s ease, background-color 0.3s; }
+
+/* Δείκτης κατάστασης */
+.status-live { color: #10b981 !important; }
+.status-demo { color: #fbbf24 !important; }
+.status-offline { color: #ef4444 !important; }
+
+/* Συμπτυσσόμενες ενότητες */
+.vrm-section-divider { cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+.vrm-section-divider::after { content: '▾'; font-size: 1rem; transition: transform 0.25s; }
+.vrm-section-divider.collapsed::after { transform: rotate(-90deg); }
+.vrm-section-divider.collapsed + .vrm-section-body { display: none; }
+
+/* Εφέ φόρτωσης (skeleton) */
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.vrm-value.skeleton {
+    color: transparent !important; width: 60%; border-radius: 6px;
+    background: linear-gradient(90deg, rgba(128,128,128,0.15) 25%, rgba(128,128,128,0.32) 50%, rgba(128,128,128,0.15) 75%);
+    background-size: 200% 100%; animation: shimmer 1.4s infinite linear;
+}
+
+/* Sidebar */
+.sidebar { background-image: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.12)); scrollbar-width: thin; }
+.sidebar-title { font-size: 1.05em; letter-spacing: 1.5px; text-transform: uppercase; }
+.sidebar a { margin: 2px 12px; width: calc(100% - 24px); border-radius: 8px; }
+.sidebar a.active { border-left-width: 4px; }
+
+/* Header */
+header { background-image: radial-gradient(circle at 80% 0%, rgba(255,255,255,0.12), transparent 55%), var(--header-gradient); }
+header h1 { font-size: clamp(2rem, 5vw, 3.8rem); letter-spacing: 2px; text-shadow: 0 2px 14px rgba(0,0,0,0.3); }
+header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
+
+/* Κατάλογος / κάρτες */
+.card-logo { box-sizing: content-box; padding: 8px; border-radius: 10px; background: color-mix(in srgb, var(--victron-blue) 14%, transparent); }
+.progress-bar-fill, .card-progress-bar-fill { background-image: linear-gradient(90deg, var(--victron-orange), #ffa05a); }
+.vault-item { overflow: hidden; }
+.vault-item img { transition: transform 0.4s ease; }
+.vault-item:hover img { transform: scale(1.04); }
+
+/* Συμπτυσσόμενες ενότητες σελίδας (προεπιλογή: κλειστές) */
+.collapsible-title { cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.collapsible-title::after { content: '▾'; font-size: 1.1rem; color: var(--victron-orange); transition: transform 0.25s; }
+.collapsible-title.collapsed::after { transform: rotate(-90deg); }
+.collapsible-title.collapsed { margin-bottom: 0 !important; }
+.collapsible-title:hover { opacity: 0.85; }
+
+/* Το Live Telemetry σε κουτί ίδιο με τα υπόλοιπα (progress-card) */
+.vrm-custom-dashboard {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 25px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--victron-orange);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+.vrm-custom-dashboard > .component-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--victron-blue) !important;
+    margin: 0 0 20px 0;
+}
+
+/* Εικονίδια SVG στους τίτλους των κουτιών */
+.vault-title, .vrm-custom-dashboard > .component-title { display: flex; align-items: center; }
+.title-icon {
+    width: 1.15em; height: 1.15em; margin-right: 12px; flex-shrink: 0;
+    fill: none; stroke: var(--victron-orange); stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+}
+.collapsible-title { justify-content: flex-start; }
+.collapsible-title::after { margin-left: auto; }
+
+/* Σύνδεσμος System Components */
+.components-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--victron-orange); color: #fff !important; text-decoration: none;
+    font-weight: 700; padding: 10px 20px; border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.components-link:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.18); }
+.back-link { display: inline-block; margin-bottom: 4px; color: var(--victron-blue); font-weight: 700; text-decoration: none; }
+.back-link:hover { text-decoration: underline; }
+
+/* Εικονίδια καρτών: ενιαίο στυλ γραμμών */
+.card-logo { fill: none !important; stroke: currentColor !important; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--victron-blue); }
+
+/* Θερμοκρασίες συσκευών */
+.temp-list { margin-top: 4px; }
+.temp-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 5px 0; border-bottom: 1px dashed rgba(128, 128, 128, 0.25); }
+.temp-row:last-child { border-bottom: none; }
+.temp-name { font-size: 0.85rem; font-weight: 600; opacity: 0.85; }
+.temp-val { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
+.temp-val.skeleton { color: transparent !important; width: auto; background-size: 200% 100%; border-radius: 6px; }
+    
+/* Sidebar: long labels wrap instead of being cut off */
+.sidebar a { white-space: normal; line-height: 1.25; }
+</style>
+</head>
+
+<body id="pageBody">
+
+    <div id="mySidebar" class="sidebar">
+                <!-- ADVERTISEMENT -->
+        <div
+            style="padding: 10px 20px 20px 20px; flex-grow: 1; display: flex; flex-direction: column; box-sizing: border-box;">
+            <a href="https://victronenergy.com" target="_blank"
+                style="background: rgba(56, 189, 248, 0.04); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px dashed #38bdf8; border-radius: 8px; padding: 25px 10px; text-align: center; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; cursor: pointer; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.background='rgba(56, 189, 248, 0.07)'; this.style.boxShadow='0 4px 12px rgba(56, 189, 248, 0.1)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(56, 189, 248, 0.04)'; this.style.boxShadow='none';">
+                <svg viewBox="0 0 24 24"
+                    style="width: 32px; height: 32px; fill: none; stroke: #38bdf8; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; margin-bottom: 8px;">
+                    <rect x="2" y="2" width="20" height="20" rx="2" />
+                    <path d="M7 8h10M7 12h10M7 16h6" />
+                </svg>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.75em; font-weight: 700; color: #38bdf8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
+                    <span class="lang-en">Advertisement Gateway</span><span class="lang-el">Πύλη Διαφήμισης</span>
+                </div>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.9em; color: #ffffff !important; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px;">
+                    <span class="lang-en">Advertisement</span><span class="lang-el">Διαφήμιση</span>
+                </div>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; color: #e2e8f0 !important; opacity: 0.85; font-weight: 500; line-height: 1.4; max-width: 200px;">
+                    <span class="lang-en">Premium off-grid power systems.</span><span class="lang-el">Premium συστήματα
+                        αυτόνομης ισχύος.</span>
+                </div>
+            </a>
+        </div>
+        <div class="sidebar-title">
+            <span class="lang-en">Project Map</span>
+            <span class="lang-el">Χάρτης Έργου</span>
+        </div>
+        <a href="index.html" class="active">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M4 2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v3h4V4H4zm6 0v3h4V4h-4zm6 0v3h4V4h-4zM4 9v3h4V9H4zm6 0v3h4V9h-4zm6 0v3h4V9h-4zm-6 8h4v5h-4v-5zm-2 5h-1v-4l4-1v5h-3z" />
+            </svg>
+            <span class="lang-en">Apollo Project Home</span>
+            <span class="lang-el">Αρχική Apollo Project</span>
+        </a>
+        <a href="system_components.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path fill-rule="evenodd" d="M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm1 3v6h6V9H9z" /><path d="M9 2h2v3H9zM13 2h2v3h-2zM9 19h2v3H9zM13 19h2v3h-2zM2 9h3v2H2zM2 13h3v2H2zM19 9h3v2h-3zM19 13h3v2h-3z" />            </svg>
+            <span class="lang-en">System Components</span>
+            <span class="lang-el">Εξαρτήματα Συστήματος</span>
+        </a>
+        <a href="production_calculator.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path fill-rule="evenodd" d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm1 3v3h10V6H7zm0 5v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zm-8 4v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z" />
+            </svg>
+            <span class="lang-en">Shades &amp; Production Calculator</span>
+            <span class="lang-el">Υπολογιστής Σκιάσεων &amp; Παραγωγής</span>
+        </a>
+        <a href="phaethons_grid.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M19 12h-2.58l-2.48-4.34A2 2 0 0 0 12.2 6.6H7.5A3.5 3.5 0 0 0 4 10.1v1.4a2.5 2.5 0 0 0 2 2.45v2.1a3.5 3.5 0 1 0 2 .1v-2.15h4.15l1.64 2.87a2 2 0 0 0 1.74 1h3.47a1 1 0 0 0 0-2h-3.47l-1.37-2.4H19a1 1 0 0 0 0-2zm-11 5a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 8 17zm-2-5.45v-1.45A1.5 1.5 0 0 1 7.5 8.6h4.7a.5.5 0 0 1 .43.26l2 3.5H6z" />
+            </svg>
+            <span class="lang-en">-Phaethon’s Grid</span>
+            <span class="lang-el">-Πλέγμα Φαέθωνα</span>
+        </a>
+        <a href="zeus_switch.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M19 9h-5.63l1.83-7.14a.5.5 0 0 0-.84-.45l-9.92 11.23a.5.5 0 0 0 .37.83h5.63l-1.83 7.14a.5.5 0 0 0 .84.45l9.92-11.23A.5.5 0 0 0 19 9z" />
+            </svg>
+            <span class="lang-en">-Zeus Switch</span>
+            <span class="lang-el">-Διακόπτης Δία</span>
+        </a>
+        <a href="flying_dutchman.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M19 14.5a2.5 2.5 0 0 0-2.5-2.5H3a1 1 0 1 0 0 2h13.5a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5H11a1 1 0 1 0 0 2h5.5a2.5 2.5 0 0 0 2.5-2.5zm1-5a2.5 2.5 0 0 0-2.5-2.5H4a1 1 0 0 0 0 2h13.5a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5H13a1 1 0 1 0 0 2h4.5A2.5 2.5 0 0 0 20 9.5z" />
+            </svg>
+            <span class="lang-en">-Voreas & Flying Dutchman</span>
+            <span class="lang-el">-Βορέας & Ιπτάμενος Ολλανδός</span>
+        </a>
+        <a href="ariadnes_thread.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <circle cx="9" cy="12" r="6" />
+                <path
+                    d="M6 9a4 4 0 0 1 6 0M4.5 12.5a4.5 4.5 0 0 1 9 0M9 6a6 6 0 0 1 3 5.19M15 12c2.5 0 3-3 5-3s2.5 2 4 2"
+                    stroke-width="1.8" />
+            </svg>
+            <span class="lang-en">-Ariadne’s Thread</span>
+            <span class="lang-el">-Μήτος της Αριάδνης</span>
+        </a>
+        <a href="cronus_vault.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="18" height="14" rx="2" />
+                <path d="M7 6V4h2v2M15 6V4h2v2M7 11h4M7 15h10" />
+            </svg>
+            <span class="lang-en">-Cronus Vault</span>
+            <span class="lang-el">-Κρύπτη του Κρόνου</span>
+        </a>
+        <a href="argus_vision.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 9a3 3 0 0 1 .5 0M9 12a3 3 0 0 1 0-.5" />
+            </svg>
+            <span class="lang-en">-Argus Vision</span>
+            <span class="lang-el">-Άργος ο Πανόπτης</span>
+        </a>
+        <a href="daedalus_code.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <rect x="2" y="2" width="20" height="20" rx="4" />
+                <path d="M6 6h12v4H10v4h8v4M14 10v4" />
+                <circle cx="6" cy="6" r="1" fill="currentColor" />
+                <circle cx="18" cy="18" r="1" fill="currentColor" />
+            </svg>
+            <span class="lang-en">-Daedalus Code</span>
+            <span class="lang-el">-Κώδικας του Δαιδάλου</span>
+        </a>
+        <a href="chirons_tests.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M2 17h20M6 21h12M12 17v4M6 10l3-3 4 6 2-3h3" />
+            </svg>
+            <span class="lang-en">-Chiron’s Tests</span>
+            <span class="lang-el">-Μυαλό του Χείρων</span>
+        </a>
+        <a href="talos_secure.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M13 7h-2l-2 5h3l-1 5 4-6h-2z" fill="currentColor" stroke="none" />
+            </svg>
+            <span class="lang-en">-Talos Secure</span>
+            <span class="lang-el">-Φύλακας Τάλος</span>
+        </a>
+        <a href="genesis_spark.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M12 2Q12 12 2 12Q12 12 12 22Q12 12 22 12Q12 12 12 2" />
+                <path d="M12 8v8M8 12h8" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="1" fill="currentColor" />
+            </svg>
+            <span class="lang-en">-Genesis Spark</span>
+            <span class="lang-el">-Σπίθα της Γένεσις</span>
+        </a>
+        <a href="themis_audit.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M12 3v17M8 20h8M3 7h18M5 7l-2 5h4zm14 0l-2 5h4z" />
+                <path d="M4.5 10l.5 1M18.5 10l.5 1" stroke-width="1.5" />
+                <path d="M4.5 9.5l.5-2M18.5 9.5l.5-2" stroke-width="1.5" />
+                <path d="M18.5 10.5l.5.5-1 1.5" stroke-width="1.5" />
+                <path d="M4.5 11l.5-2.5h1l-.5 2" stroke-width="1.5" />
+            </svg>
+            <span class="lang-en">-Themis Audit</span>
+            <span class="lang-el">-Έλεγχος της Θέμιδος</span>
+        </a>
+
+        <!-- TOTAL PROGRESS -->
+        <div style="padding: 20px 25px 15px 25px; border-top: 1px solid var(--border-color); box-sizing: border-box;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; font-family: 'Segoe UI', sans-serif; font-size: 0.75em; font-weight: 700; color: var(--victron-orange) !important; margin-bottom: 6px; letter-spacing: 1px;">
+                <span class="lang-en">TOTAL PROGRESS</span>
+                <span class="lang-el">ΣΥΝΟΛΙΚΗ ΠΡΟΟΔΟΣ</span>
+                <span id="progressPercentage">0%</span>
+            </div>
+            <div
+                style="width: 100%; background-color: var(--border-color); border-radius: 4px; height: 6px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
+                <div id="progressBar"
+                    style="height: 100%; background-color: var(--victron-orange); width: 0%; transition: width 0.5s ease-in-out;">
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- ΔΙΟΡΘΩΜΕΝΟΣ HEADER ΜΕ ΤΟ DARK MODE ΚΑΤΩ ΔΕΞΙΑ -->
+    <header>
+        <!-- 1. ΠΡΟΣΘΕΤΕΤΕ ΤΟ ΚΟΥΜΠΙ ΤΗΣ ΓΛΩΣΣΑΣ ΕΔΩ -->
+        <button id="lang-toggle" class="lang-btn" onclick="switchLanguage()">Ελληνικά</button>
+
+        <h1>Apollo Project</h1>
+        <p>
+            <span class="lang-en">Home Solar System Installation & Commissioning</span>
+            <span class="lang-el">Εγκατάσταση & Θέση σε Λειτουργία Οικιακού Φωτοβολταϊκού</span>
+        </p>
+
+        <div class="theme-toggle-inline"
+            style="position: absolute; bottom: 15px; right: 30px; display: flex; align-items: center; gap: 10px; font-family: 'Segoe UI', sans-serif; font-size: 0.8em; color: #e0f2fe; font-weight: 600; z-index: 10;">
+            <span>🌙 Dark Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="themeCheckbox">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
+
+
+    <div class="progress-section" style="margin-top: 30px; margin-bottom: 0;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-blue);">
+            <div class="vault-title"><svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Do It Yourself</div>
+            <div
+                style="font-size: 1.1em; font-weight: 600; color: var(--victron-orange); margin-bottom: 12px; margin-top: 4px;">
+                <span class="lang-en">Off-Grid Solar Installation Powered by an Amateur Handyman</span>
+                <span class="lang-el">Αυτόνομη Φωτοβολταϊκή Εγκατάσταση από έναν Ερασιτέχνη Τεχνικό</span>
+            </div>
+            <p style="margin: 0; line-height: 1.6; color: var(--card-text);">
+                <span class="lang-en">Welcome to the Apollo Project. This dashboard tracks the complete development,
+                    building process, and real-time validation of a fully autonomous off-grid solar storage system.
+                    Designed and integrated under personal responsibility, the system features a robust combination of
+                    industrial AC/DC distribution, intelligent thermal management, high-density LiFePO4 storage
+                    clusters, and Victron Energy telemetry.</span>
+                <span class="lang-el">Καλώς ορίσατε στο Apollo Project. Αυτό το ταμπλό παρακολουθεί την πλήρη ανάπτυξη,
+                    τη διαδικασία κατασκευής και την επικύρωση σε πραγματικό χρόνο ενός πλήρως αυτόνομου συστήματος
+                    αποθήκευσης ηλιακής ενέργειας. Σχεδιασμένο και ενσωματωμένο με προσωπική ευθύνη, το σύστημα διαθέτει
+                    έναν ισχυρό συνδυασμό βιομηχανικής διανομής AC/DC, έξυπνης θερμικής διαχείρισης, συστοιχιών
+                    αποθήκευσης LiFePO4 υψηλής πυκνότητας και τηλεμετρίας Victron Energy.</span>
+            </p>
+        </div>
+    </div>
+<!-- Κεντρικό Πάνελ VRM Τηλεμετρίας (Πλήρες & Εναρμονισμένο) -->
+<div class="progress-section">
+<div class="vrm-custom-dashboard component-card">
+    <h2 class="component-title">
+        <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> 
+        <span class="lang-el">Κέντρο Ελέγχου & Live Τηλεμετρίας Victron</span>
+        <span class="lang-en">Victron Live Telemetry & Control Center</span>
+    </h2>
+    
+    <!-- ΕΝΟΤΗΤΑ Α: ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ (LIVE FEED) & ΔΙΑΓΝΩΣΤΙΚΑ -->
+    <div class="vrm-grid-container">
+        <!-- 1. Μπαταρία -->
+        <div class="vrm-card battery-card">
+            <h3><span class="lang-el">Μπαταρία (SOC)</span><span class="lang-en">Battery Bank</span></h3>
+            <div class="vrm-value" id="vrm-soc">--%</div>
+            <div class="soc-bar"><span id="vrm-soc-bar"></span></div>
+            <div class="vrm-subtext" id="vrm-batt-voltage">-- V | -- A</div>
+        </div>
+
+        <!-- 2. Φωτοβολταϊκά (Στιγμιαία) -->
+        <div class="vrm-card solar-card">
+            <h3><span class="lang-el">Παραγωγή ΦΒ</span><span class="lang-en">Solar Power</span></h3>
+            <div class="vrm-value" id="vrm-solar">-- W</div>
+            <div class="vrm-subtext" id="vrm-solar-yield">-- kWh σήμερα</div>
+        </div>
+
+        <!-- 3. Κατανάλωση Οικίας -->
+        <div class="vrm-card load-card">
+            <h3><span class="lang-el">Κατανάλωση</span><span class="lang-en">Consumption</span></h3>
+            <div class="vrm-value" id="vrm-consumption">-- W</div>
+            <div class="vrm-subtext" id="vrm-inverter-status">--</div>
+        </div>
+
+        <!-- 4. Δημόσιο Δίκτυο (Grid) -->
+        <div class="vrm-card grid-card">
+            <h3><span class="lang-el">Δίκτυο (Grid)</span><span class="lang-en">Grid Power</span></h3>
+            <div class="vrm-value" id="vrm-grid">-- W</div>
+            <div class="vrm-subtext" id="vrm-grid-status">--</div>
+        </div>
+
+        <!-- 5. Θερμοκρασίες Συστήματος -->
+        <div class="vrm-card temp-card">
+            <h3><span class="lang-el">Θερμοκρασίες</span><span class="lang-en">Temperatures</span></h3>
+            <div class="temp-list">
+                <div class="temp-row"><span class="temp-name">Left 150/45</span><span class="temp-val" id="vrm-t-left">-- °C</span></div>
+                <div class="temp-row"><span class="temp-name">Right 150/45</span><span class="temp-val" id="vrm-t-right">-- °C</span></div>
+                <div class="temp-row"><span class="temp-name">Multiplus 6k5</span><span class="temp-val" id="vrm-t-multi">-- °C</span></div>
+            </div>
+            <div class="vrm-subtext" id="vrm-temp-status">--</div>
+        </div>
+
+        <!-- 6. Κατάσταση Πύλης Cerbo GX -->
+        <div class="vrm-card system-card">
+            <h3><span class="lang-el">Κατάσταση Πύλης</span><span class="lang-en">Gateway Status</span></h3>
+            <div class="vrm-value" id="vrm-status">--</div>
+            <div class="vrm-subtext" id="vrm-last-updated">--</div>
+        </div>
+    </div>
+
+    <!-- ΕΝΟΤΗΤΑ Γ: ΓΡΑΦΗΜΑΤΑ (ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ ΜΕΤΑ ΤΟ STATUS) -->
+    <h3 class="vrm-section-divider">
+        <span class="lang-el">📈 Διαγράμματα Ανάλυσης Ενέργειας & Φόρτισης</span>
+        <span class="lang-en">📈 Energy Analysis & Charging Charts</span>
+    </h3>
+
+    <div class="vrm-charts-grid">
+        <!-- Γράφημα 1: Ισοζύγιο Ενέργειας 7 Ημερών -->
+        <div class="vrm-chart-box">
+            <h4><span class="lang-el">Κατανάλωση ανά Πηγή (kWh)</span><span class="lang-en">Consumption by Source (kWh)</span></h4>
+            <div id="vrm-energy-chart"></div>
+        </div>
+
+        <!-- Γράφημα 2: Στάδια Φόρτισης Μπαταρίας (Bulk / Absorption / Float) -->
+        <div class="vrm-chart-box">
+            <h4><span class="lang-el">Κατανομή Χρόνου Φόρτισης (% ημέρας)</span><span class="lang-en">Charge Stages Share (% of day)</span></h4>
+            <div id="vrm-stages-chart"></div>
+        </div>
+    </div>
+
+    <!-- ΕΝΟΤΗΤΑ Β: ΕΞΥΠΝΑ ΙΣΤΟΡΙΚΑ ΣΤΑΤΙΣΤΙΚΑ (7 ΗΜΕΡΩΝ & HIGHLIGHTS) -->
+    <h3 class="vrm-section-divider">
+        <span class="lang-el">📊 Ενεργειακά Highlights & Στατιστικά 7 Ημερών</span>
+        <span class="lang-en">📊 Energy Highlights & 7-Day Stats</span>
+    </h3>
+    
+    <div class="vrm-grid-container">
+        <!-- 7. Συνολική Κατανάλωση (7d) -->
+        <div class="vrm-card load-card">
+            <h3><span class="lang-el">Συνολική Κατανάλωση (7d)</span><span class="lang-en">Total Consumption (7d)</span></h3>
+            <div class="vrm-value" id="vrm-7d-cons">-- kWh</div>
+            <div class="vrm-subtext"><span class="lang-el">Συνολικές ανάγκες οικίας</span><span class="lang-en">Total house needs</span></div>
+        </div>
+
+        <!-- 8. Ποσοστό Αυτονομίας ΦΒ -->
+        <div class="vrm-card solar-card">
+            <h3><span class="lang-el">Πράσινη Αυτονομία</span><span class="lang-en">Solar Share</span></h3>
+            <div class="vrm-value" id="vrm-7d-solar-pct">--%</div>
+            <div class="vrm-subtext" id="vrm-7d-solar-kwh">-- kWh παραγωγή</div>
+        </div>
+
+        <!-- 9. ΝΕΟ: Μέγιστη Ισχύς Ημέρας (Peak Solar) -->
+        <div class="vrm-card peak-card">
+            <h3><span class="lang-el">Αιχμή Παραγωγής</span><span class="lang-en">Peak Solar Power</span></h3>
+            <div class="vrm-value" id="vrm-peak-solar">-- W</div>
+            <div class="vrm-subtext" id="vrm-peak-time">Σήμερα</div>
+        </div>
+
+        <!-- 10. ΝΕΟ: Απόδοση Μπαταρίας (Round-trip Efficiency) -->
+        <div class="vrm-card battery-efficiency-card">
+            <h3><span class="lang-el">Απόδοση Μπαταρίας</span><span class="lang-en">Battery Efficiency</span></h3>
+            <div class="vrm-value" id="vrm-battery-eff">--%</div>
+            <div class="vrm-subtext" id="vrm-battery-cycles">DIY LiFePO4 Bank</div>
+        </div>
+    </div>
+
+    <!-- ΕΝΟΤΗΤΑ Β2: ΚΑΙΡΟΣ & ΠΡΟΒΛΕΨΗ ΠΑΡΑΓΩΓΗΣ (Open-Meteo) -->
+    <h3 class="vrm-section-divider">
+        <span class="lang-el">☀️ Καιρός & Πρόβλεψη Ηλιακής Παραγωγής</span>
+        <span class="lang-en">☀️ Weather & Solar Forecast</span>
+    </h3>
+
+    <div class="vrm-grid-container">
+        <div class="vrm-card system-card">
+            <h3><span class="lang-el">Καιρός Τώρα</span><span class="lang-en">Weather Now</span></h3>
+            <div class="vrm-value" id="wx-now-temp">-- °C</div>
+            <div class="vrm-subtext" id="wx-now-desc">--</div>
+        </div>
+        <div class="vrm-card peak-card">
+            <h3><span class="lang-el">Ηλιακή Ακτινοβολία</span><span class="lang-en">Solar Irradiance</span></h3>
+            <div class="vrm-value" id="wx-now-rad">-- W/m²</div>
+            <div class="vrm-subtext"><span class="lang-el">Άμεση τιμή (οριζόντιο επίπεδο)</span><span class="lang-en">Right now (horizontal plane)</span></div>
+        </div>
+    </div>
+
+    <!-- Κάρτες πρόβλεψης ανά ημέρα και ανά πεδίο (δημιουργούνται από JavaScript) -->
+    <div class="wx-days" id="wx-days"></div>
+
+    <div class="vrm-subtext" style="margin-bottom: 10px;">
+        <span class="lang-el">Εκτίμηση παραγωγής = ακτινοβολία × ισχύς ΦΒ × εποχιακός συντελεστής (σκιάσεις, θερμοκρασία, απώλειες) ανά πεδίο. Δεδομένα καιρού:</span>
+        <span class="lang-en">Estimated production = irradiance × PV size × seasonal factor (shading, temperature, losses) per roof field. Weather data by</span>
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: inherit;">Open-Meteo.com</a>
+    </div>
+
+</div>
+</div>
+
+    <!-- SYSTEM COMPONENTS: κουτί-σύνδεσμος προς ξεχωριστή σελίδα -->
+    <div class="progress-section" style="margin-top: 25px; margin-bottom: 0;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-orange); padding: 25px;">
+            <div class="vault-title" style="margin-bottom: 14px;">
+                <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg><span class="lang-en">System Components</span><span class="lang-el">Εξαρτήματα Συστήματος</span>
+            </div>
+            <p style="margin: 0 0 18px 0; line-height: 1.6; opacity: 0.85;">
+                <span class="lang-en">The full catalog of Victron and installation components: specifications, datasheets, videos and photo galleries, now on its own page.</span>
+                <span class="lang-el">Ο πλήρης κατάλογος εξαρτημάτων Victron και εγκατάστασης: προδιαγραφές, datasheets, βίντεο και συλλογές φωτογραφιών, σε ξεχωριστή σελίδα.</span>
+            </p>
+            <a href="system_components.html" class="components-link">
+                <span class="lang-en">Open System Components</span><span class="lang-el">Άνοιγμα Εξαρτημάτων Συστήματος</span> ➔
+            </a>
+        </div>
+    </div>
+
+    <!-- SHADES & PRODUCTION CALCULATOR: κουτί-σύνδεσμος προς ξεχωριστή σελίδα -->
+    <div class="progress-section" style="margin-top: 25px; margin-bottom: 0;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-blue); padding: 25px;">
+            <div class="vault-title" style="margin-bottom: 14px;">
+                <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17" cy="6" r="3"/><path d="M3 21V12h5v9M8 21V8h5v13M13 21v-7h5v7M2 21h20"/></svg><span class="lang-en">Shades &amp; Production Calculator</span><span class="lang-el">Υπολογιστής Σκιάσεων &amp; Παραγωγής</span>
+            </div>
+            <p style="margin: 0 0 18px 0; line-height: 1.6; opacity: 0.85;">
+                <span class="lang-en">During the planning stage, I knew I was facing a major challenge: the panels were to be installed on a single-story house in an urban setting, surrounded by apartment buildings.
+                    There is limited sunshine, especially in winter, meaning the panels will primarily capture diffuse light. There is also a constraint regarding the available installation space: a rooftop storage shed roof with an East-West orientation and a fixed pitch.
+                    So, to calculate at least the system's monthly output, I created a calculation tool that accounts for the site's obstructions. It might be useful for you, too!
+                    Enter your PV fields (power, direction, tilt) and the buildings around them (height, distance) to calculate the shading and the energy produced for every month, with a yearly total.</span>
+                <span class="lang-el">Κατά τον σχεδιασμό γνώριζα ότι έχω να αντιμετωπίσω μία πολύ μεγάλη πρόκληση: Η εγκατάσταση των πάνελ γίνεται σε ισόγεια κατοικία εμτός αστικού περιβάλλοντος, με πολυκατοικίες να την περιστοιχίζουν περιμετρικά.
+                    Η ηλιοφάνεια μικρή, ειδικά τον χειμώνα, γεγονός που σημαίνει ότι τα πάνελ θα μαζεύουν κθρίως διάχυτο φως. Επίσης υπάρχει άλλη μία δέσμευση, καθώς ο διαθέσιμος χώρος τοποθέτησης αφορά μία σκεπή αποθήκης στην ταράτσα με προσανατολισμό Α-Δ και προκαθοριμένη κλίση.
+                    Συνεπώς για να μπορέσω να υπολογισω την μηνιαία τουλάχιστον παραγωγή του συστήματος έφτιαξα ένα εργαλείο υπολογισμού σύμφωνα με τα εμπόδια του χώρου. Ίσως να είναι χρήσιμο και για εσένα!
+                    Εισάγετε τα πεδία Φ/Β (ισχύς, κατεύθυνση, κλίση) και τα κτίρια γύρω τους (ύψος, απόσταση) για να υπολογίσετε τη σκίαση και την παραγόμενη ενέργεια ανά μήνα, με ετήσιο σύνολο.</span>
+            </p>
+            <a href="production_calculator.html" class="components-link">
+                <span class="lang-en">Open the calculator</span><span class="lang-el">Άνοιγμα υπολογιστή</span> ➔
+            </a>
+        </div>
+    </div>
+
+    <!-- 📊 VISIO DIAGRAM BOARD (ΠΡΟΣΘΗΚΗ ΕΠΑΝΩ ΑΠΟ SYSTEM COMPONENTS) -->
+    <div class="progress-section" style="margin-top: 30px; margin-bottom: 0;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-orange); padding: 25px;">
+            <div class="vault-title" style="margin-bottom: 20px;">
+                <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M12 8v4M5 16v-4h14v4"/></svg><span class="lang-en">System Architecture Diagram</span>
+                <span class="lang-el">Διάγραμμα Αρχιτεκτονικής Συστήματος</span>
+            </div> <!-- Ενσωμάτωση του σχεδίου Visio με Click-to-Full Screen -->
+            <div
+                style="width: 100%; height: 550px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.02); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box;">
+
+                <!-- Ο σύνδεσμος <a> περιβάλλει την εικόνα για να ανοίγει σε νέα καρτέλα (target="_blank") -->
+                <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1786423939/%CE%A3%CF%87%CE%AD%CE%B4%CE%B9%CE%BF_pages-to-jpg-0001.jpg"
+                    target="_blank" style="display: block; width: 100%; height: 100%; text-align: center;">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786424918/%CE%A3%CF%87%CE%AD%CE%B4%CE%B9%CE%BF_.png"
+                        alt="System Architecture Diagram"
+                        style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; cursor: pointer; transition: opacity 0.2s;"
+                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                </a>
+            </div>
+
+            <!-- Δίγλωσσο κουμπί για άνοιγμα του σχεδίου σε πλήρη οθόνη -->
+            <div style="margin-top: 15px; text-align: right;">
+                <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1786423939/%CE%A3%CF%87%CE%AD%CE%B4%CE%B9%CE%BF_pages-to-jpg-0001.jpg"
+                    target="_blank"
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.85em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                    <span class="lang-en">Open Diagram in Full Screen ➔</span>
+                    <span class="lang-el">Άνοιγμα Διαγράμματος σε Πλήρη Οθόνη ➔</span>
+                </a>
+            </div>
+                        <div
+                style="width: 100%; height: 550px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.02); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box;">
+
+                <!-- Ο σύνδεσμος <a> περιβάλλει την εικόνα για να ανοίγει σε νέα καρτέλα (target="_blank") -->
+                <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_poly.png"
+                    target="_blank" style="display: block; width: 100%; height: 100%; text-align: center;">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_poly.png"
+                        alt="System Architecture Diagram"
+                        style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; cursor: pointer; transition: opacity 0.2s;"
+                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                </a>
+            </div>
+
+            <!-- Δίγλωσσο κουμπί για άνοιγμα του σχεδίου σε πλήρη οθόνη -->
+            <div style="margin-top: 15px; text-align: right;">
+                <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_poly.png"
+                    target="_blank"
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.85em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                    <span class="lang-en">Open Diagram in Full Screen ➔</span>
+                    <span class="lang-el">Άνοιγμα Διαγράμματος σε Πλήρη Οθόνη ➔</span>
+                </a>
+            </div>
+                                    <div
+                style="width: 100%; height: 550px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.02); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box;">
+
+                <!-- Ο σύνδεσμος <a> περιβάλλει την εικόνα για να ανοίγει σε νέα καρτέλα (target="_blank") -->
+                <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_mono.png"
+                    target="_blank" style="display: block; width: 100%; height: 100%; text-align: center;">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_mono.png"
+                        alt="System Architecture Diagram"
+                        style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; cursor: pointer; transition: opacity 0.2s;"
+                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                </a>
+            </div>
+
+            <!-- Δίγλωσσο κουμπί για άνοιγμα του σχεδίου σε πλήρη οθόνη -->
+            <div style="margin-top: 15px; text-align: right;">
+                <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_mono.png"
+                    target="_blank"
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.85em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                    <span class="lang-en">Open Diagram in Full Screen ➔</span>
+                    <span class="lang-el">Άνοιγμα Διαγράμματος σε Πλήρη Οθόνη ➔</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Click & Design pdf) -->
+    <div class="progress-section" style="margin-top: 30px; margin-bottom: 0;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-blue); padding: 25px;">
+            <div class="vault-title" style="margin-bottom: 20px;">
+                <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg><span class="lang-en">Victron Click & Design System</span>
+                <span class="lang-el">Σχεδιασμός Συστήματος στο Victron Click & Design</span>
+            </div>
+
+            <!-- Ενσωμάτωση του σχεδίου με Click-to-Full Screen και σωστή προσαρμογή εικόνας -->
+            <div
+                style="width: 100%; height: 550px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.02); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box;">
+                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786430177/report-My_system-2026-08-11T09_32_page-0001.jpg"
+                    alt="Victron Click & Design" class="gallery-trigger"
+                    style="width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'"
+                    data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786430177/report-My_system-2026-08-11T09_32_page-0001.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430182/report-My_system-2026-08-11T09_32_page-0002.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430191/report-My_system-2026-08-11T09_32_page-0004.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430191/report-My_system-2026-08-11T09_32_page-0005.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430191/report-My_system-2026-08-11T09_32_page-0006.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430191/report-My_system-2026-08-11T09_32_page-0007.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430191/report-My_system-2026-08-11T09_32_page-0008.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430191/report-My_system-2026-08-11T09_32_page-0009.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786430191/report-My_system-2026-08-11T09_32_page-0010.jpg">
+            </div>
+
+            <!-- Κεντραρισμένο κουμπί κάτω από την εικόνα -->
+            <div style="margin-top: 15px; text-align: right;">
+                <a href="https://click-and-design.victronenergy.com/dashboard/schematics" target="_blank"
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.9em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                    <span class="lang-en">Open Victron Click & Design ➔</span>
+                    <span class="lang-el">Άνοιγμα Victron Click & Design ➔</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- SYSTEM COMPONENTS - HIGH TECH INLINE SVG EDITION (0% LOADING DELAY) -->
+    
+
+    <!-- 📋 SYSTEM INTEGRATION STEPS (ΚΑΘΑΡΟΣ ΤΙΤΛΟΣ) -->
+    <div class="progress-section" style="margin-top: 40px; margin-bottom: 10px;">
+        <div class="vault-title">
+            <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="lang-en">System Integration Steps</span>
+            <span class="lang-el">Βήματα Υλοποίησης Συστήματος</span>
+        </div>
+    </div>
+
+    <!-- ΤΟ ΠΛΕΓΜΑ ΜΕ ΤΑ ΚΟΥΤΑΚΙΑ (BENTO GRID - ΜΙΑ ΦΟΡΑ ΑΝΟΙΓΜΑ) -->
+    <div class="container" style="margin-top: 15px; margin-bottom: 40px;">
+
+        <!-- CARD 1 -->
+        <a href="phaethons_grid.html" class="grid-item" data-page="phaethons_grid.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="1"/><path d="M2 12h20M9 6v12M15 6v12"/></svg>
+                <h2>
+                    <span class="lang-en">Phaethon’s Grid</span>
+                    <span class="lang-el">Το Πλέγμα του Φαέθωνα</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> PV panel installation and solar array alignment.</span>
+                <span class="lang-el"> Εγκατάσταση πάνελ και ευθυγράμμιση της συστοιχίας.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 2 -->
+        <a href="zeus_switch.html" class="grid-item" data-page="zeus_switch.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <h2>
+                    <span class="lang-en">Zeus Switch</span>
+                    <span class="lang-el">Ο Διακόπτης του Διός</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Assembly and installation of PV combiners and main AC/DC electrical distribution
+                    boards.</span>
+                <span class="lang-el"> Συναρμολόγηση και εγκατάσταση πινάκων παράλληλης σύνδεσης Φ/Β (combiners) και
+                    κύριων πινάκων ηλεκτρικής διανομής AC/DC.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 3 -->
+        <a href="flying_dutchman.html" class="grid-item" data-page="flying_dutchman.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+                <h2>
+                    <span class="lang-en">Voreas & Dutchman</span>
+                    <span class="lang-el">Ο Βορέας & ο Ιπτάμενος Ολλανδός</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Construction & installation of the air-floating enclosure with active ventilation
+                    for the Victron MultiPlus-II, MPPT’s and Battery.</span>
+                <span class="lang-el"> Κατασκευή και εγκατάσταση του αερο-αιωρούμενου περιβλήματος με ενεργό αερισμό για
+                    τα Victron MultiPlus-II, MPPTs και την μπαταρία.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 4 -->
+        <a href="ariadnes_thread.html" class="grid-item" data-page="ariadnes_thread.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c4 0 4-10 9-10s5 10 9 10"/><circle cx="3" cy="17" r="1.5"/><circle cx="21" cy="17" r="1.5"/></svg>
+                <h2>
+                    <span class="lang-en">Ariadne’s Thread</span>
+                    <span class="lang-el">Μίτος της Αριάδνης</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Heavy-duty DC/AC routing, labeling, and cable management.</span>
+                <span class="lang-el"> Βαρέος τύπου όδευση, σήμανση και διαχείριση καλωδίων DC/AC.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 5 -->
+        <a href="cronus_vault.html" class="grid-item" data-page="cronus_vault.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="13" x2="23" y2="11"/><path d="M9 10l-2 4h4l-2 4"/></svg>
+                <h2>
+                    <span class="lang-en">Cronus Vault</span>
+                    <span class="lang-el">Κρύπτη του Κρόνου</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Battery bank assembly, safe placement, busbar installation, and main DC
+                    connection.</span>
+                <span class="lang-el"> Συναρμολόγηση συστοιχίας μπαταριών, ασφαλής τοποθέτηση, εγκατάσταση ζυγών
+                    διανομής (busbars) και κύρια σύνδεση DC.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 6 -->
+        <a href="argus_vision.html" class="grid-item" data-page="argus_vision.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <h2>
+                    <span class="lang-en">Argus Vision</span>
+                    <span class="lang-el">Άργος ο Πανόπτης</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Cerbo & Energy meter installation, connections, and telemetry programming.</span>
+                <span class="lang-el"> Εγκατάσταση Cerbo & μετρητή ενέργειας, συνδέσεις και προγραμματισμός
+                    τηλεμετρίας.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+        <!-- CARD 7 -->
+        <a href="daedalus_code.html" class="grid-item" data-page="daedalus_code.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <h2>
+                    <span class="lang-en">Daedalus Code</span>
+                    <span class="lang-el">Κώδικας του Δαιδάλου</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Firmware updates, ESS (Energy Storage System) assistants configuration, Venus OS
+                    programming & VRM.</span>
+                <span class="lang-el"> Ενημερώσεις υλικολογισμικού (firmware), διαμόρφωση βοηθητικών προγραμμάτων
+                    (assistants) ESS, προγραμματισμός Venus OS & VRM.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 8 -->
+        <a href="chirons_tests.html" class="grid-item" data-page="chirons_tests.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3"/><path d="M7.5 15h9"/></svg>
+                <h2>
+                    <span class="lang-en">Chiron's Tests</span>
+                    <span class="lang-el">Δοκιμές του Χείρωνα</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Operational system testing, charge/discharge cycle validation, and dynamic load
+                    testing.</span>
+                <span class="lang-el"> Λειτουργικές δοκιμές συστήματος, επικύρωση κύκλων φόρτισης/εκφόρτισης και δοκιμές
+                    δυναμικού φορτίου.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 9 -->
+        <a href="talos_secure.html" class="grid-item" data-page="talos_secure.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <h2>
+                    <span class="lang-en">Talos Secure</span>
+                    <span class="lang-el">Φύλακας Τάλος</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Safety measurements, insulation testing, RCD tripping checks, and emergency
+                    shutdown validation.</span>
+                <span class="lang-el"> Μετρήσεις ασφαλείας, έλεγχος μόνωσης, έλεγχοι ενεργοποίησης RCD και επικύρωση
+                    λειτουργίας διακοπής έκτακτης ανάγκης.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 10 -->
+        <a href="genesis_spark.html" class="grid-item" data-page="genesis_spark.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                <h2>
+                    <span class="lang-en">Genesis Spark</span>
+                    <span class="lang-el">Σπίθα της Γένεσης</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Pre-commissioning cold checks and the system’s official first powered
+                    start-up.</span>
+                <span class="lang-el"> Έλεγχοι πριν από τη θέση σε λειτουργία χωρίς τάση (cold checks) και η επίσημη
+                    πρώτη εκκίνηση του συστήματος υπό τάση.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- CARD 11 -->
+        <a href="themis_audit.html" class="grid-item" data-page="themis_audit.html"
+            style="border-left-color: var(--victron-blue);">
+            <div class="card-title-row">
+                <svg class="card-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <h2>
+                    <span class="lang-en">Themis Audit</span>
+                    <span class="lang-el">Έλεγχος της Θέμιδος</span>
+                </h2>
+            </div>
+            <p>
+                <strong class="lang-en">Scope:</strong><strong class="lang-el">Σκοπός:</strong>
+                <span class="lang-en"> Final monitoring setup, VRM Portal synchronization, and remote data
+                    validation.</span>
+                <span class="lang-el"> Τελική ρύθμιση παρακολούθησης, συγχρονισμός VRM Portal και απομακρυσμένη
+                    επικύρωση δεδομένων.</span>
+            </p>
+            <div class="card-progress-wrapper">
+                <div class="card-progress-bar-container">
+                    <div class="card-progress-bar-fill"></div>
+                </div><span class="card-progress-text">0%</span>
+            </div>
+        </a>
+
+        <!-- NATIVE SPONSOR CARD -->
+        <div class="grid-item"
+            style="border-left: 5px solid #be123c; opacity: 0.95; transition: transform 0.25s, box-shadow 0.25s;">
+            <div>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.75em; font-weight: 700; color: var(--victron-orange) !important; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px;">
+                    <span class="lang-en">SPONSORED PARTNER</span><span class="lang-el">ΧΟΡΗΓΟΣ ΣΥΝΕΡΓΑΤΗΣ</span>
+                </div>
+                <h2
+                    style="margin: 0; font-size: 1.4em; color: var(--victron-blue) !important; font-weight: 700; font-family: 'Segoe UI', sans-serif;">
+                    <span class="lang-en">Reliable Power Infrastructure</span><span class="lang-el">Αξιόπιστη Υποδομή
+                        Ισχύος</span>
+                </h2>
+                <p style="margin: 10px 0 0; font-size: 0.9em; line-height: 1.6; color: var(--card-text);">
+                    <span class="lang-en">Explore certified off-grid components, heavy-duty switchgear, and protective
+                        enclosures.</span>
+                    <span class="lang-el">Εξερευνήστε πιστοποιημένα αυτόνομα εξαρτήματα, πίνακες βαρέος τύπου και
+                        προστατευτικά περιβλήματα.</span>
+                </p>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <a href="https://victronenergy.com" target="_blank"
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.85em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.5px; display: inline-block; transition: transform 0.2s;">
+                    <span class="lang-en">Learn More ➔</span><span class="lang-el">Μάθετε Περισσότερα ➔</span>
+                </a>
+            </div>
+        </div>
+
+    </div> <!-- ΚΛΕΙΣΙΜΟ ΤΟΥ CONTAINER -->
+
+    <footer style="margin-top: 50px; margin-bottom: 20px; text-align: center; clear: both;">
+        <p
+            style="font-family: 'Segoe UI', 'Montserrat', sans-serif; font-size: 0.9em; font-weight: 600; color: var(--victron-blue) !important; margin: 0; letter-spacing: 0.5px;">
+            &copy; 2026 Pean to Apollo &bull; Mike Voudigaris
+        </p>
+        <div
+            style="font-family: 'Segoe UI', sans-serif; font-size: 0.75em; color: var(--card-text); opacity: 0.8; line-height: 1.5; max-width: 850px; margin: 12px auto 0 auto; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 0 20px;">
+            <span style="text-align: center;">
+                <span class="lang-en">A paean to Apollo is an ancient Greek lyric song of thanksgiving, triumph, or
+                    healing addressed specifically to the god Apollo.</span>
+                <span class="lang-el">Ο παιάνας προς τον Απόλλωνα είναι ένα αρχαίο ελληνικό λυρικό άσμα ευχαριστίας,
+                    θριάμβου ή θεραπείας που απευθύνεται ειδικά στον θεό Απόλλωνα.</span>
+            </span>
+            <a href="https://wikipedia.org" target="_blank"
+                style="font-size: 0.93em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; white-space: nowrap; display: inline-flex; align-items: center; transition: opacity 0.2s;">
+                <span class="lang-en">Read about Paean on Wikipedia ➔</span>
+                <span class="lang-el">Διαβάστε για τον Παιάνα στη Wikipedia ➔</span>
+            </a>
+        </div>
+    </footer>
+
+    <div class="progress-section" style="margin-top: 10px; margin-bottom: 30px; clear: both;">
+        <a href="https://victronenergy.com" target="_blank" class="progress-card"
+            style="display: block; background: rgba(22, 55, 94, 0.02); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px dashed var(--border-color); padding: 12px; text-align: center; border-radius: 8px; box-sizing: border-box; max-width: 728px; margin-left: auto; margin-right: auto; opacity: 0.6; text-decoration: none; transition: opacity 0.2s, transform 0.2s;"
+            onmouseover="this.style.opacity='0.95'; this.style.transform='scale(1.01)';"
+            onmouseout="this.style.opacity='0.6'; this.style.transform='scale(1)';">
+            <div
+                style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; box-sizing: border-box;">
+                <svg viewBox="0 0 24 24"
+                    style="width: 20px; height: 20px; fill: none; stroke: var(--victron-blue); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.7; flex-shrink: 0;">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <path d="M8 21h8M12 17v4" />
+                </svg>
+                <div style="text-align: left; font-family: 'Segoe UI', sans-serif;">
+                    <span
+                        style="font-size: 0.7em; font-weight: 700; color: var(--victron-blue); letter-spacing: 1px; text-transform: uppercase;"><span
+                            class="lang-en">Advertisement Gateway</span><span class="lang-el">Πύλη
+                            Διαφήμισης</span></span>
+                    <span style="font-size: 0.8em; color: var(--card-text); font-weight: 500; margin-left: 5px;"><span
+                            class="lang-en">Advertisement</span><span class="lang-el">Διαφήμιση</span></span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <script>
+        // 0. Λειτουργία Εναλλαγής Γλώσσας (Toggle Language)
+        function switchLanguage() {
+            let elElements = document.querySelectorAll('.lang-el');
+            let enElements = document.querySelectorAll('.lang-en');
+            let btn = document.getElementById('lang-toggle');
+
+            // Έλεγχος της τρέχουσας κατάστασης (αν τα ελληνικά είναι κρυμμένα)
+            if (btn.innerText === "Ελληνικά") {
+                // Ενεργοποίηση Ελληνικών: Εμφάνιση ελληνικών, απόκρυψη αγγλικών
+                elElements.forEach(el => {
+                    el.style.display = (el.tagName === 'SPAN' || el.tagName === 'STRONG') ? 'inline' : 'block';
+                });
+                enElements.forEach(el => el.style.display = 'none');
+                btn.innerText = "English";
+                document.documentElement.setAttribute("lang", "el");
+            } else {
+                // Ενεργοποίηση Αγγλικών: Εμφάνιση αγγλικών, απόκρυψη ελληνικών
+                elElements.forEach(el => el.style.display = 'none');
+                enElements.forEach(el => {
+                    el.style.display = (el.tagName === 'SPAN' || el.tagName === 'STRONG') ? 'inline' : 'block';
+                });
+                btn.innerText = "Ελληνικά";
+                document.documentElement.setAttribute("lang", "en");
+            }
+        }
+        // 1. Λειτουργία Άνοιγμα / Κλείσιμο Sidebar
+        function toggleNav() {
+            var sidebar = document.getElementById("mySidebar");
+            var body = document.getElementById("pageBody");
+            var btn = document.getElementById("menuBtn");
+
+            sidebar.classList.toggle("open");
+            body.classList.toggle("sidebar-open");
+
+            if (sidebar.classList.contains("open")) {
+                btn.innerHTML = "✕";
+            } else {
+                btn.innerHTML = "☰";
+            }
+        }
+
+        // 2. Διαχείριση Dark Mode Θέματος
+        const themeCheckbox = document.getElementById("themeCheckbox");
+        const currentTheme = localStorage.getItem("apollo_theme") || "light";
+
+        if (currentTheme === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+            themeCheckbox.checked = true;
+        }
+
+        themeCheckbox.addEventListener("change", function () {
+            if (this.checked) {
+                document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("apollo_theme", "dark");
+            } else {
+                document.documentElement.setAttribute("data-theme", "light");
+                localStorage.setItem("apollo_theme", "light");
+            }
+        });
+
+        // 3. Υπολογισμός Live Προόδου (Κεντρικής και Ανά Κάρτα)
+        document.addEventListener("DOMContentLoaded", function () {
+            const pages = [
+                "phaethons_grid.html", "zeus_switch.html", "flying_dutchman.html",
+                "ariadnes_thread.html", "cronus_vault.html", "argus_vision.html",
+                "daedalus_code.html", "chirons_tests.html", "talos_secure.html",
+                "genesis_spark.html", "themis_audit.html"
+            ];
+
+            let totalGlobalTasks = pages.length * 10;
+            let completedGlobalTasks = 0;
+
+            pages.forEach(page => {
+                const pageKey = "apollo_tasks_" + page;
+                const savedStates = JSON.parse(localStorage.getItem(pageKey)) || {};
+                let completedCardTasks = 0;
+
+                for (let i = 0; i < 10; i++) {
+                    if (savedStates[i] === undefined || savedStates[i] === true) {
+                        completedCardTasks++;
+                        completedGlobalTasks++;
+                    }
+                }
+
+                let cardPercentage = Math.round((completedCardTasks / 10) * 100);
+
+                const cardElement = document.querySelector(`.grid-item[data-page="${page}"]`);
+                if (cardElement) {
+                    const fillBar = cardElement.querySelector(".card-progress-bar-fill");
+                    const textBar = cardElement.querySelector(".card-progress-text");
+                    if (fillBar && textBar) {
+                        fillBar.style.width = cardPercentage + "%";
+                        textBar.innerText = cardPercentage + "%";
+                    }
+                }
+            });
+
+            let globalPercentage = Math.round((completedGlobalTasks / totalGlobalTasks) * 100);
+            document.getElementById("progressPercentage").innerText = globalPercentage + "%";
+            document.getElementById("progressBar").style.width = globalPercentage + "%";
+        });
+        // 5. Έξυπνη Διαχείριση Πολλαπλών Συλλογών Φωτογραφιών (Dynamic LightBox)
+        let activeGalleryImages = [];
+        let currentDynSlideIndex = 0;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Εντοπισμός όλων των εικόνων υλικών με την κλάση gallery-trigger
+            const triggers = document.querySelectorAll('.gallery-trigger');
+
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function () {
+                    // Διάβασμα των εικόνων από το data-images attribute και μετατροπή σε πίνακα
+                    const imagesAttr = this.getAttribute('data-images');
+                    if (!imagesAttr) return;
+
+                    activeGalleryImages = imagesAttr.split(',').map(img => img.trim());
+                    currentDynSlideIndex = 0; // Ξεκινάμε πάντα από την πρώτη εικόνα
+
+                    openDynamicLightbox();
+                });
+            });
+        });
+
+        function openDynamicLightbox() {
+            if (activeGalleryImages.length === 0) return;
+            document.getElementById("dynamicLightbox").style.display = "block";
+
+            // Αν η συλλογή έχει μόνο 1 εικόνα, κρύβουμε τα βέλη πλοήγησης
+            const prevArrow = document.getElementById("dynLightboxPrev");
+            const nextArrow = document.getElementById("dynLightboxNext");
+            if (activeGalleryImages.length <= 1) {
+                prevArrow.style.display = "none";
+                nextArrow.style.display = "none";
+            } else {
+                prevArrow.style.display = "block";
+                nextArrow.style.display = "block";
+            }
+
+            buildThumbnails();
+            updateDynGalleryView();
+        }
+
+        function closeDynamicLightbox() {
+            document.getElementById("dynamicLightbox").style.display = "none";
+        }
+
+        function changeDynSlide(direction) {
+            currentDynSlideIndex += direction;
+            if (currentDynSlideIndex >= activeGalleryImages.length) currentDynSlideIndex = 0;
+            if (currentDynSlideIndex < 0) currentDynSlideIndex = activeGalleryImages.length - 1;
+            updateDynGalleryView();
+        }
+
+        function setDynSlide(index) {
+            currentDynSlideIndex = index;
+            updateDynGalleryView();
+        }
+
+        // Αυτόματο χτίσιμο των Thumbnails ανάλογα με το υλικό
+        function buildThumbnails() {
+            const thumbsContainer = document.getElementById("dynLightboxThumbs");
+            thumbsContainer.innerHTML = ""; // Καθαρισμός παλιών thumbnails
+
+            // Αν υπάρχει μόνο μία εικόνα, δεν χρειάζεται να δείχνουμε μικρογραφία από κάτω
+            if (activeGalleryImages.length <= 1) return;
+
+            activeGalleryImages.forEach((imgUrl, index) => {
+                const thumbImg = document.createElement("img");
+                thumbImg.src = imgUrl;
+                thumbImg.className = "lightbox-thumb";
+                thumbImg.addEventListener('click', function () {
+                    setDynSlide(index);
+                });
+                thumbsContainer.appendChild(thumbImg);
+            });
+        }
+
+        function updateDynGalleryView() {
+            document.getElementById("dynLightboxMain").src = activeGalleryImages[currentDynSlideIndex];
+            document.getElementById("dynLightboxNum").innerText = (currentDynSlideIndex + 1) + " / " + activeGalleryImages.length;
+
+            // Highlighting του ενεργού thumbnail
+            const thumbs = document.getElementsByClassName("lightbox-thumb");
+            for (let i = 0; i < thumbs.length; i++) {
+                thumbs[i].classList.remove("active-thumb");
+            }
+            if (thumbs[currentDynSlideIndex]) {
+                thumbs[currentDynSlideIndex].classList.add("active-thumb");
+                thumbs[currentDynSlideIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        // Κλείσιμο με το πλήκτρο ESC
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") closeDynamicLightbox();
+        });
+
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+
+// 1. ΣΥΝΔΕΣΗ VRM: το token ΔΕΝ υπάρχει πια στη σελίδα. Η κλήση γίνεται μέσω του /api/vrm (Vercel Serverless).
+
+
+function getCurrentLanguage() {
+    // Ανίχνευση γλώσσας από το attribute του HTML ή από κλάση στο body
+    const htmlLang = document.documentElement.lang || "";
+    if (htmlLang.includes('en') || document.body.classList.contains('en')) return 'en';
+    return 'el'; // Default στα Ελληνικά
+}
+
+// ==========================================================
+// 2. ΔΙΑΧΕΙΡΙΣΗ ΔΕΔΟΜΕΝΩΝ (Με απόλυτο έλεγχο σφαλμάτων try/catch)
+// ==========================================================
+async function fetchVictronData() {
+    const lang = getCurrentLanguage();
+
+    // Ανίχνευση τοπικού περιβάλλοντος (file:// ή Live Server) για Mock Data
+    if (window.location.protocol === 'file:' || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        console.log("Local Test Environment: Generating Safe Interface Previews.");
+        const mockLive = {
+            soc: { value: 92 }, battery_voltage: { value: 53.1 }, battery_current: { value: 18.5 },
+            solar_power: { value: 2150 }, total_solar_yield: 8.2, consumption: { value: 680 },
+            grid_power: { value: 0 }, temperature: 23.8
+        };
+        const mockStats = {
+            total_consumption_7d: 154.3, total_solar_yield_7d: 122.1,
+            peak_solar_power: 3150, battery_efficiency: 94.2
+        };
+        
+        try { updateDashboard(mockLive, lang, 'demo'); } catch(e) { console.warn("Dashboard Error:", e); }
+        try { processHistoricalStats(mockStats, lang); } catch(e) { console.warn("Stats Error:", e); }
+        return;
+    }
+
+    // Live Feed & Stats Endpoints (Vercel Serverless Function: api/vrm.js)
+    const liveUrl = "/api/vrm?type=live";
+    const statsUrl = "/api/vrm?type=stats";
+
+    try {
+        const liveRes = await fetch(liveUrl);
+        if (!liveRes.ok) {
+            setVrmStatus('offline', lang);
+            liveRes.clone().text().then(function (t) { console.warn('VRM /api/vrm?type=live → HTTP ' + liveRes.status, t.slice(0, 400)); });
+        }
+        if (liveRes.ok) {
+            const liveData = await liveRes.json();
+            
+            // ΜΕΤΑΦΡΑΣΗ ΔΕΔΟΜΕΝΩΝ VICTRON LIVE FEED
+            if (liveData && liveData.records) {
+                const raw = liveData.records;
+                
+                // Φτιάχνουμε το flat αντικείμενο που περιμένει η updateDashboard σου
+                const formattedRecords = {
+                    soc: raw.soc || (raw.battery && raw.battery.soc) || 0,
+                    battery_voltage: raw.battery_voltage || (raw.battery && raw.battery.voltage) || 0,
+                    battery_current: raw.battery_current || (raw.battery && raw.battery.current) || 0,
+                    solar_power: raw.solar_power || (raw.solar && raw.solar.power) || 0,
+                    total_solar_yield: raw.total_solar_yield || (raw.solar && raw.solar.yield) || 0,
+                    consumption: raw.consumption || (raw.consumption && raw.consumption.power) || 0,
+                    grid_power: raw.grid_power || (raw.grid && raw.grid.power) || 0,
+                    temperature: raw.temperature || 25, // Default τιμή αν λείπει
+                    temp_left: raw.temp_left,
+                    temp_right: raw.temp_right,
+                    temp_multi: raw.temp_multi
+                };
+
+                updateDashboard(formattedRecords, lang);
+            }
+        }
+
+        const statsRes = await fetch(statsUrl);
+        if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData && statsData.records) {
+                // Προσαρμογή ιστορικών στατιστικών
+                let rawStats = statsData.records;
+                if (Array.isArray(rawStats.daily)) window.vrmDaily = rawStats.daily;
+                let totalCons = rawStats.consumption ? rawStats.consumption.reduce(function(a,b){ return a+(b.value||0); }, 0) : 0;
+                let totalSol = rawStats.solar_yield ? rawStats.solar_yield.reduce(function(a,b){ return a+(b.value||0); }, 0) : 0;
+                let peakSol = rawStats.peak_solar ? Math.max.apply(null, rawStats.peak_solar.map(function(o){ return o.value||0; })) : 0;
+                
+                // Αν τα δεδομένα έρχονται σε flat μορφή από εναλλακτικό endpoint
+                if(!totalCons && rawStats.total_consumption_7d) totalCons = rawStats.total_consumption_7d;
+                if(!totalSol && rawStats.total_solar_yield_7d) totalSol = rawStats.total_solar_yield_7d;
+                if(!peakSol && rawStats.peak_solar_power) peakSol = rawStats.peak_solar_power;
+
+                processHistoricalStats({
+                    total_consumption_7d: totalCons,
+                    total_solar_yield_7d: totalSol,
+                    peak_solar_power: peakSol,
+                    battery_efficiency: 93.5
+                }, lang);
+            }
+        }
+    } catch (error) {
+        console.error('Victron API Fetch Suppressed Error:', error);
+        setVrmStatus('offline', lang);
+    }
+}
+
+
+function setVrmStatus(mode, lang) {
+    const el = document.getElementById('vrm-status');
+    if (!el) return;
+    const en = lang === 'en';
+    const txt = { live: en ? 'Connected' : 'Σε σύνδεση', demo: en ? 'Demo data' : 'Δεδομένα επίδειξης', offline: en ? 'Offline' : 'Εκτός σύνδεσης' };
+    el.innerText = txt[mode];
+    el.style.color = '';
+    el.className = 'vrm-value status-' + mode;
+}
+
+function updateDashboard(records, lang, mode) {
+    setVrmStatus(mode || 'live', lang);
+
+    // Ασφαλής έλεγχος ύπαρξης στοιχείων (DOM Check) πριν την εγγραφή τιμής
+    var elem;
+    if (records.soc && (elem = document.getElementById('vrm-soc'))) { const socV = Math.round(records.soc.value !== undefined ? records.soc.value : records.soc); elem.innerText = socV + '%'; const bar = document.getElementById('vrm-soc-bar'); if (bar) { bar.style.width = Math.min(100, Math.max(0, socV)) + '%'; bar.style.backgroundColor = socV < 20 ? '#ef4444' : (socV < 50 ? '#f97316' : '#10b981'); } }
+    if (records.battery_voltage && records.battery_current && (elem = document.getElementById('vrm-batt-voltage'))) {
+        var v = records.battery_voltage.value !== undefined ? records.battery_voltage.value : records.battery_voltage;
+        var c = records.battery_current.value !== undefined ? records.battery_current.value : records.battery_current;
+        elem.innerText = Number(v).toFixed(1) + " V | " + Number(c).toFixed(1) + " A";
+    }
+    if (records.solar_power && (elem = document.getElementById('vrm-solar'))) elem.innerText = Math.round(records.solar_power.value !== undefined ? records.solar_power.value : records.solar_power) + ' W';
+    if (document.getElementById('vrm-solar-yield')) document.getElementById('vrm-solar-yield').innerText = lang === 'en' ? (records.total_solar_yield || 0) + " kWh today" : (records.total_solar_yield || 0) + " kWh σήμερα";
+    if (records.consumption && (elem = document.getElementById('vrm-consumption'))) elem.innerText = Math.round(records.consumption.value !== undefined ? records.consumption.value : records.consumption) + ' W';
+    if ((records.grid_power !== undefined || records.grid) && (elem = document.getElementById('vrm-grid'))) {
+        var gp = records.grid_power !== undefined ? records.grid_power : (records.grid.value || 0);
+        elem.innerText = Math.round(gp) + ' W';
+    }
+    if (records.temperature && (elem = document.getElementById('vrm-temp'))) elem.innerText = Number(records.temperature).toFixed(1) + " °C";
+
+    // Θερμοκρασίες: Left 150/45, Right 150/45, Multiplus 6k5
+    let maxT = null;
+    [['temp_left', 'vrm-t-left', 41.2], ['temp_right', 'vrm-t-right', 39.8], ['temp_multi', 'vrm-t-multi', 47.5]].forEach(function (d) {
+        let v = records[d[0]];
+        if ((v === undefined || v === null) && mode === 'demo') v = d[2];
+        const el = document.getElementById(d[1]);
+        if (!el) return;
+        if (v === undefined || v === null || isNaN(Number(v))) { el.innerText = 'n/a'; el.style.color = ''; return; }
+        v = Number(v);
+        el.innerText = v.toFixed(1) + ' °C';
+        el.style.color = v >= 75 ? '#ef4444' : (v >= 60 ? '#f97316' : '');
+        maxT = maxT === null ? v : Math.max(maxT, v);
+    });
+    const tStatus = document.getElementById('vrm-temp-status');
+    if (tStatus) {
+        const en = lang === 'en';
+        if (maxT === null) tStatus.innerText = en ? 'No temperature data' : 'Χωρίς δεδομένα θερμοκρασίας';
+        else if (maxT >= 75) tStatus.innerText = en ? 'High – check ventilation' : 'Υψηλή – ελέγξτε τον αερισμό';
+        else if (maxT >= 60) tStatus.innerText = en ? 'Warm' : 'Ζεστή';
+        else tStatus.innerText = en ? 'Normal' : 'Φυσιολογική';
+    }
+    
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString(lang === 'en' ? 'en-US' : 'el-GR', { hour: '2-digit', minute: '2-digit' });
+    if (document.getElementById('vrm-last-updated')) document.getElementById('vrm-last-updated').innerText = lang === 'en' ? "Updated: " + timeStr : "Ενημερώθηκε: " + timeStr;
+}
+
+function processHistoricalStats(stats, lang) {
+    const pct = stats.total_consumption_7d > 0 ? Math.round((stats.total_solar_yield_7d / stats.total_consumption_7d) * 100) : 0;
+    
+    if (document.getElementById('vrm-7d-cons')) document.getElementById('vrm-7d-cons').innerText = stats.total_consumption_7d.toFixed(1) + " kWh";
+    if (document.getElementById('vrm-7d-solar-pct')) document.getElementById('vrm-7d-solar-pct').innerText = (pct > 100 ? 100 : pct) + "%";
+    if (document.getElementById('vrm-7d-solar-kwh')) document.getElementById('vrm-7d-solar-kwh').innerText = stats.total_solar_yield_7d.toFixed(1) + " kWh";
+    if (document.getElementById('vrm-peak-solar')) document.getElementById('vrm-peak-solar').innerText = stats.peak_solar_power + " W";
+    if (document.getElementById('vrm-battery-eff')) document.getElementById('vrm-battery-eff').innerText = stats.battery_efficiency + "%";
+
+    // Κλήση γραφημάτων μόνο αν οι συναρτήσεις είναι διαθέσιμες
+    if (typeof renderEnergyChart === 'function') renderEnergyChart(lang);
+    if (typeof renderStagesChart === 'function') renderStagesChart(lang);
+}
+
+// ==========================================================
+// 3. ΑΣΦΑΛΗΣ ΕΝΣΩΜΑΤΩΣΗ ΣΤΑ ΚΟΥΜΠΙΑ TOOGLE ΤΟΥ SITE
+// ==========================================================
+function syncDashboardInteractivity() {
+    // Αλλαγή γλώσσας: ξαναφορτώνουμε δεδομένα και γραφήματα στη νέα γλώσσα
+    const langBtn = document.getElementById('lang-toggle');
+    if (langBtn) langBtn.addEventListener('click', function () {
+        setTimeout(function () {
+            fetchVictronData();
+            renderEnergyChart(getCurrentLanguage());
+            renderStagesChart(getCurrentLanguage());
+        }, 150);
+    });
+
+    // Αλλαγή θέματος: ξανασχεδιάζουμε μόνο τα γραφήματα
+    const themeBox = document.getElementById('themeCheckbox');
+    if (themeBox) themeBox.addEventListener('change', function () {
+        setTimeout(function () {
+            renderEnergyChart(getCurrentLanguage());
+            renderStagesChart(getCurrentLanguage());
+        }, 50);
+    });
+}
+
+// Εκτέλεση κατά τη φόρτωση
+fetchVictronData();
+syncDashboardInteractivity();
+
+// Αυτόματη ανανέωση ζωντανών τιμών κάθε 60'' (όχι τοπικά, όχι ξανασχεδίαση γραφημάτων)
+if (!(window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname))) {
+    setInterval(async function () {
+        try {
+            const r = await fetch('/api/vrm?type=live');
+            if (!r.ok) { setVrmStatus('offline', getCurrentLanguage()); return; }
+            const j = await r.json();
+            if (j && j.records) updateDashboard(j.records, getCurrentLanguage());
+        } catch (e) { setVrmStatus('offline', getCurrentLanguage()); }
+    }, 60000);
+}
+// Τα γραφήματα σχεδιάζονται πάντα, ανεξάρτητα από την απόκριση του API
+renderEnergyChart(getCurrentLanguage());
+renderStagesChart(getCurrentLanguage());
+// ==========================================
+// ΜΗΧΑΝΕΣ ΓΡΑΦΗΜΑΤΩΝ (APEXCHARTS) - ΚΟΜΜΑΤΙ 2
+// ==========================================
+function vrmIsLocal() {
+    return window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].indexOf(window.location.hostname) !== -1;
+}
+
+function renderEnergyChart(lang) {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const en = lang === 'en';
+    let cats = [], solar = [], battery = [], grid = [];
+
+    if (Array.isArray(window.vrmDaily) && window.vrmDaily.length) {
+        // ΠΡΑΓΜΑΤΙΚΑ δεδομένα από το VRM (kWh ανά ημέρα και ανά πηγή)
+        window.vrmDaily.forEach(function (d) {
+            cats.push(new Date(d.ts).toLocaleDateString(en ? 'en-GB' : 'el-GR', { weekday: 'short', day: 'numeric' }));
+            solar.push(Number(d.solar) || 0);
+            battery.push(Number(d.battery) || 0);
+            grid.push(Number(d.grid) || 0);
+        });
+    } else if (vrmIsLocal()) {
+        // Δεδομένα επίδειξης (μόνο τοπικά)
+        cats = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        solar = [12.4, 15.1, 14.8, 16.2, 11.9, 13.5, 14.2];
+        battery = [4.2, 3.8, 4.5, 3.1, 5.0, 4.4, 3.9];
+        grid = [3.1, 2.4, 4.1, 1.2, 5.3, 2.1, 1.8];
+    }
+
+    const options = {
+        series: [
+            { name: en ? 'Solar (direct)' : 'ΦΒ (άμεσα)', data: solar },
+            { name: en ? 'Battery' : 'Μπαταρία', data: battery },
+            { name: en ? 'Grid' : 'Δίκτυο', data: grid }
+        ],
+        chart: {
+            type: 'bar', height: 280, stacked: true,
+            toolbar: { show: false }, background: 'transparent',
+            foreColor: isDark ? '#94a3b8' : '#64748b'
+        },
+        colors: ['#fbbf24', '#10b981', '#a855f7'],
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+        xaxis: { categories: cats },
+        yaxis: { labels: { formatter: function (v) { return v.toFixed(0); } } },
+        tooltip: { y: { formatter: function (v) { return v.toFixed(1) + ' kWh'; } } },
+        noData: { text: en ? 'No data yet' : 'Δεν υπάρχουν δεδομένα ακόμα' },
+        legend: { position: 'top' },
+        theme: { mode: isDark ? 'dark' : 'light' },
+        grid: { borderColor: isDark ? '#334155' : '#e2e8f0' }
+    };
+
+    const chartDiv = document.getElementById('vrm-energy-chart');
+    if (chartDiv && typeof ApexCharts !== 'undefined') {
+        chartDiv.innerHTML = '';
+        const chart = new ApexCharts(chartDiv, options);
+        chart.render();
+    }
+}
+
+function renderStagesChart(lang) {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const en = lang === 'en';
+    let values = [], labels = [], colors = [];
+
+    const st = window.vrmStages;
+    if (st && (st.bulk + st.absorption + st.float + st.other) > 0) {
+        // ΠΡΑΓΜΑΤΙΚΑ δεδομένα: ώρες σε κάθε στάδιο τις τελευταίες 24 ώρες
+        const items = [
+            [st.bulk, en ? 'Bulk Charging' : 'Φόρτιση Bulk', '#06b6d4'],
+            [st.absorption, en ? 'Absorption' : 'Απορρόφηση (Absorption)', '#fbbf24'],
+            [st.float, en ? 'Float State' : 'Συντήρηση (Float)', '#10b981'],
+            [st.other, en ? 'Other (storage/equalize)' : 'Άλλο (storage/equalize)', '#a855f7']
+        ];
+        items.forEach(function (it) {
+            if (it[0] > 0) { values.push(Math.round(it[0] * 100) / 100); labels.push(it[1]); colors.push(it[2]); }
+        });
+    } else if (vrmIsLocal()) {
+        values = [50, 35, 15];
+        labels = [en ? 'Bulk Charging' : 'Φόρτιση Bulk', en ? 'Absorption' : 'Απορρόφηση (Absorption)', en ? 'Float State' : 'Συντήρηση (Float)'];
+        colors = ['#06b6d4', '#fbbf24', '#10b981'];
+    }
+
+    const options = {
+        series: values,
+        chart: { type: 'donut', height: 280, background: 'transparent', foreColor: isDark ? '#94a3b8' : '#64748b' },
+        labels: labels,
+        colors: colors,
+        legend: { position: 'bottom' },
+        tooltip: { y: { formatter: function (v) { return v.toFixed(1) + (en ? ' h' : ' ώρες'); } } },
+        dataLabels: { formatter: function (v) { return Math.round(v) + '%'; } },
+        noData: { text: en ? 'No data yet' : 'Δεν υπάρχουν δεδομένα ακόμα' },
+        theme: { mode: isDark ? 'dark' : 'light' },
+        stroke: { show: false }
+    };
+
+    const chartDiv = document.getElementById('vrm-stages-chart');
+    if (chartDiv && typeof ApexCharts !== 'undefined') {
+        chartDiv.innerHTML = '';
+        const chart = new ApexCharts(chartDiv, options);
+        chart.render();
+    }
+}
+
+async function fetchStages() {
+    if (vrmIsLocal()) return;
+    try {
+        const r = await fetch('/api/vrm?type=stages');
+        if (!r.ok) return;
+        const j = await r.json();
+        if (j && j.success && j.records) {
+            window.vrmStages = j.records;
+            renderStagesChart(getCurrentLanguage());
+        }
+    } catch (e) { console.warn('Charge stages fetch failed:', e); }
+}
+
+
+// ==========================================================
+// ΚΑΙΡΟΣ & ΠΡΟΒΛΕΨΗ ΠΑΡΑΓΩΓΗΣ (Open-Meteo, δωρεάν, χωρίς κλειδί)
+// ==========================================================
+// >>> ΑΛΛΑΞΤΕ ΤΙΣ ΤΡΕΙΣ ΤΙΜΕΣ ΠΑΡΑΚΑΤΩ ΜΕ ΤΑ ΔΙΚΑ ΣΑΣ <<<
+const SITE_LAT = 37.93;            // γεωγραφικό πλάτος της εγκατάστασης
+const SITE_LON = 23.63;            // γεωγραφικό μήκος της εγκατάστασης
+// Δύο πεδία ΦΒ. Ο συντελεστής f[] (Ιαν..Δεκ) εφαρμόζεται στην ΟΡΙΖΟΝΤΙΑ ακτινοβολία του Open-Meteo και
+// περιλαμβάνει: κλίση/προσανατολισμό, σκιάσεις από τα γύρω κτίρια, θερμοκρασία, ρύπανση, καλωδίωση, MPPT.
+// (Μοντέλο: Πειραιάς, 9 x STP245 Ανατολικά κλίση 20% + 12 x STP245 Δυτικά κλίση 15%.
+//  Γύρω κτίρια: Δ 15 μ. σε 1 μ., Β 19 μ. σε 1 μ., Α ~17 μ. σε 15 μ., Ν 19 μ. σε 30 μ.)
+const PV_ARRAYS = [
+    { name: 'West', el: 'West', peakEn: 'afternoon', peakEl: 'απόγευμα', kwp: 2.940, f: [0.32, 0.35, 0.35, 0.33, 0.31, 0.30, 0.29, 0.31, 0.32, 0.34, 0.34, 0.25] },
+    { name: 'East', el: 'East', peakEn: 'morning', peakEl: 'πρωί', kwp: 2.205, f: [0.31, 0.39, 0.41, 0.39, 0.38, 0.36, 0.37, 0.37, 0.38, 0.38, 0.35, 0.25] }
+];
+// Διόρθωση από πραγματικές μετρήσεις: μετά από 1-2 εβδομάδες βάλτε  (πραγματική παραγωγή VRM) / (εκτίμηση της σελίδας)
+const PV_CALIBRATION = 1.0;
+
+let lastWeather = null;
+
+function wmoInfo(code, lang) {
+    const en = lang === 'en';
+    if (code === 0) return { icon: '☀️', text: en ? 'Clear sky' : 'Καθαρός ουρανός' };
+    if (code === 1) return { icon: '🌤️', text: en ? 'Mostly clear' : 'Κυρίως αίθριος' };
+    if (code === 2) return { icon: '⛅', text: en ? 'Partly cloudy' : 'Μερικώς νεφελώδης' };
+    if (code === 3) return { icon: '☁️', text: en ? 'Overcast' : 'Συννεφιά' };
+    if (code === 45 || code === 48) return { icon: '🌫️', text: en ? 'Fog' : 'Ομίχλη' };
+    if (code >= 51 && code <= 57) return { icon: '🌦️', text: en ? 'Drizzle' : 'Ψιχάλες' };
+    if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return { icon: '🌧️', text: en ? 'Rain' : 'Βροχή' };
+    if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { icon: '❄️', text: en ? 'Snow' : 'Χιόνι' };
+    if (code >= 95) return { icon: '⛈️', text: en ? 'Thunderstorm' : 'Καταιγίδα' };
+    return { icon: '🌡️', text: '--' };
+}
+
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+}
+
+function renderWeather(d, lang) {
+    if (!d || !d.current || !d.daily) return;
+    const en = lang === 'en';
+    const cur = d.current;
+    const w = wmoInfo(cur.weather_code, lang);
+
+    setText('wx-now-temp', Number(cur.temperature_2m).toFixed(1) + ' °C');
+    setText('wx-now-desc', w.icon + ' ' + w.text + ' · ' + (en ? 'Clouds ' : 'Νέφωση ') + Math.round(cur.cloud_cover) + '%');
+    setText('wx-now-rad', Math.round(cur.shortwave_radiation) + ' W/m²');
+
+    const dayNames = en ? ['Today', 'Tomorrow'] : ['Σήμερα', 'Αύριο'];
+
+    // 1ο πέρασμα: υπολογισμός ανά ημέρα και ανά πεδίο
+    const days = [];
+    let maxVal = 0.001;
+    for (let i = 0; i < 3; i++) {
+        if (d.daily.time[i] === undefined) continue;
+        const dayDate = new Date(d.daily.time[i] + 'T12:00:00');
+        const month = dayDate.getMonth();
+        // MJ/m² -> kWh/m² (÷3.6), μετά kWp x μηνιαίος συντελεστής κάθε πεδίου
+        const kwhPerM2 = d.daily.shortwave_radiation_sum[i] / 3.6;
+        const fields = PV_ARRAYS.map(function (a) {
+            return kwhPerM2 * a.kwp * a.f[month] * PV_CALIBRATION;
+        });
+        fields.forEach(function (v) { if (v > maxVal) maxVal = v; });
+        days.push({
+            title: i < 2 ? dayNames[i] : dayDate.toLocaleDateString(en ? 'en-GB' : 'el-GR', { weekday: 'long' }),
+            w: wmoInfo(d.daily.weather_code[i], lang),
+            sun: d.daily.sunshine_duration[i] / 3600,
+            tmin: Math.round(d.daily.temperature_2m_min[i]),
+            tmax: Math.round(d.daily.temperature_2m_max[i]),
+            fields: fields
+        });
+    }
+
+    // 2ο πέρασμα: δημιουργία καρτών
+    let html = '';
+    days.forEach(function (day) {
+        let total = 0;
+        let rows = '';
+        PV_ARRAYS.forEach(function (a, k) {
+            const v = day.fields[k];
+            total += v;
+            const cls = k === 0 ? 'east' : 'west';
+            const name = en ? a.name : a.el;
+            const peak = en ? a.peakEn : a.peakEl;
+            rows += '<div class="wx-field">'
+                + '<div class="wx-field-row"><span class="wx-field-name">' + name
+                + '<span class="wx-field-sub">' + a.kwp.toFixed(1) + ' kWp · ' + peak + '</span></span>'
+                + '<span class="wx-field-val">' + v.toFixed(1) + ' kWh</span></div>'
+                + '<div class="wx-bar ' + cls + '"><span style="width:' + Math.round(v / maxVal * 100) + '%"></span></div>'
+                + '</div>';
+        });
+        html += '<div class="wx-day">'
+            + '<div class="wx-day-head"><div class="wx-day-icon">' + day.w.icon + '</div><div>'
+            + '<div class="wx-day-title">' + day.title + '</div>'
+            + '<div class="wx-day-meta">' + day.w.text + ' · ' + day.sun.toFixed(1) + (en ? ' h sun · ' : ' ώρες ήλιος · ')
+            + day.tmin + '–' + day.tmax + ' °C</div></div></div>'
+            + rows
+            + '<div class="wx-total"><span>' + (en ? 'Total' : 'Σύνολο') + '</span>'
+            + '<span class="wx-total-val">' + total.toFixed(1) + ' kWh</span></div>'
+            + '</div>';
+    });
+    const container = document.getElementById('wx-days');
+    if (container) container.innerHTML = html;
+}
+
+async function fetchWeather() {
+    const url = 'https://api.open-meteo.com/v1/forecast'
+        + '?latitude=' + SITE_LAT + '&longitude=' + SITE_LON
+        + '&current=temperature_2m,cloud_cover,shortwave_radiation,weather_code'
+        + '&daily=weather_code,temperature_2m_max,temperature_2m_min,sunshine_duration,shortwave_radiation_sum'
+        + '&timezone=auto&forecast_days=3';
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return;
+        lastWeather = await res.json();
+        renderWeather(lastWeather, getCurrentLanguage());
+    } catch (e) {
+        console.warn('Open-Meteo fetch failed:', e);
+    }
+}
+
+// Συμπτυσσόμενες ενότητες (στο κινητό κλείνουν όλες εκτός από τα γραφήματα)
+(function () {
+    const dash = document.querySelector('.vrm-custom-dashboard');
+    if (!dash) return;
+    const mobile = window.matchMedia('(max-width: 700px)').matches;
+    dash.querySelectorAll('.vrm-section-divider').forEach(function (h) {
+        const body = document.createElement('div');
+        body.className = 'vrm-section-body';
+        let n = h.nextElementSibling;
+        while (n && !n.classList.contains('vrm-section-divider')) {
+            const next = n.nextElementSibling;
+            body.appendChild(n);
+            n = next;
+        }
+        h.after(body);
+        h.setAttribute('role', 'button');
+        h.setAttribute('tabindex', '0');
+        if (mobile && !body.querySelector('.vrm-charts-grid')) h.classList.add('collapsed');
+        const toggle = function () { h.classList.toggle('collapsed'); window.dispatchEvent(new Event('resize')); };
+        h.addEventListener('click', toggle);
+        h.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+})();
+
+// Εφέ φόρτωσης: οι τιμές που δείχνουν "--" αναβοσβήνουν ελαφρά μέχρι να έρθουν δεδομένα
+function refreshSkeleton() {
+    const st = document.getElementById('vrm-status');
+    const offline = st && st.classList.contains('status-offline');
+    document.querySelectorAll('.vrm-value, .temp-val').forEach(function (el) {
+        el.classList.toggle('skeleton', !offline && el.textContent.indexOf('--') !== -1);
+    });
+}
+refreshSkeleton();
+const vrmDash = document.querySelector('.vrm-custom-dashboard');
+if (vrmDash) new MutationObserver(refreshSkeleton).observe(vrmDash, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+
+// Συμπτυσσόμενες ενότητες: Διάγραμμα, Click & Design, Εξαρτήματα, Βήματα Υλοποίησης (κλειστές στην αρχή)
+(function () {
+    const names = ['System Architecture Diagram', 'Victron Click & Design System', 'System Integration Steps'];
+    const group = []; // μόνο ένα κουτί ανοιχτό τη φορά
+    document.querySelectorAll('.vault-title').forEach(function (t) {
+        const en = t.querySelector('.lang-en');
+        if (!en || names.indexOf(en.textContent.trim()) === -1) return;
+        const body = document.createElement('div');
+        body.className = 'collapse-body';
+        const parent = t.parentElement;
+        if (parent.classList.contains('progress-card')) {
+            let n = t.nextSibling;
+            while (n) { const nx = n.nextSibling; body.appendChild(n); n = nx; }
+            parent.appendChild(body);
+        } else {
+            const cont = parent.nextElementSibling; // το πλέγμα των βημάτων μετά τον τίτλο
+            if (!cont || !cont.classList.contains('container')) return;
+            // Κουτί ίδιο με τα υπόλοιπα: τίτλος + πλέγμα μέσα σε progress-card
+            const card = document.createElement('div');
+            card.className = 'progress-card';
+            card.style.cssText = 'border-left: 5px solid var(--victron-orange); padding: 25px;';
+            parent.appendChild(card);
+            card.appendChild(t);
+            t.style.marginBottom = '20px';
+            parent.style.marginBottom = '40px';
+            cont.style.margin = '0';
+            cont.style.padding = '0';
+            body.appendChild(cont);
+            card.appendChild(body);
+        }
+        t.classList.add('collapsible-title');
+        t.setAttribute('role', 'button');
+        t.setAttribute('tabindex', '0');
+        const set = function (open) {
+            t.classList.toggle('collapsed', !open);
+            body.style.display = open ? '' : 'none';
+            t.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+        const openOnly = function () { group.forEach(function (g) { if (g.t !== t) g.set(false); }); set(true); };
+        const toggle = function () { if (t.classList.contains('collapsed')) openOnly(); else set(false); };
+        group.push({ t: t, set: set });
+        body._open = openOnly;
+        set(false);
+        t.addEventListener('click', toggle);
+        t.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+
+    // Αν ένας σύνδεσμος της sidebar (#...) δείχνει μέσα σε κλειστή ενότητα, την ανοίγουμε
+    function openFor(el) { const b = el && el.closest && el.closest('.collapse-body'); if (b && b._open) b._open(); }
+    document.addEventListener('click', function (e) {
+        const a = e.target.closest && e.target.closest('a[href^="#"]');
+        if (a && a.getAttribute('href').length > 1) openFor(document.getElementById(a.getAttribute('href').slice(1)));
+    });
+    if (location.hash.length > 1) openFor(document.getElementById(location.hash.slice(1)));
+})();
+
+// Live Telemetry: συμπτυσσόμενο κουτί, κλειστό στην αρχή
+(function () {
+    const dash = document.querySelector('.vrm-custom-dashboard');
+    const t = dash && dash.querySelector(':scope > .component-title');
+    if (!t) return;
+    const body = document.createElement('div');
+    body.className = 'collapse-body';
+    let n = t.nextSibling;
+    while (n) { const nx = n.nextSibling; body.appendChild(n); n = nx; }
+    dash.appendChild(body);
+    t.classList.add('collapsible-title');
+    t.setAttribute('role', 'button');
+    t.setAttribute('tabindex', '0');
+    const set = function (open) {
+        t.classList.toggle('collapsed', !open);
+        body.style.display = open ? '' : 'none';
+        t.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) {
+            // τα γραφήματα δεν μπορούν να μετρηθούν όσο η ενότητα είναι κρυφή: τα ξανασχεδιάζουμε
+            setTimeout(function () {
+                const lang = getCurrentLanguage();
+                renderEnergyChart(lang);
+                renderStagesChart(lang);
+            }, 50);
+        }
+    };
+    body._open = function () { set(true); };
+    set(true); // Live Telemetry: ανοιχτό στην αρχή
+    t.addEventListener('click', function () { set(t.classList.contains('collapsed')); });
+    t.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(t.classList.contains('collapsed')); } });
+})();
+
+fetchStages();
+setInterval(fetchStages, 10 * 60 * 1000);
+fetchWeather();
+setInterval(fetchWeather, 30 * 60 * 1000); // ανανέωση κάθε 30 λεπτά
+
+// Αλλαγή γλώσσας: ξαναγράφουμε τα κείμενα του καιρού χωρίς νέα κλήση
+const langBtnWx = document.getElementById('lang-toggle');
+if (langBtnWx) langBtnWx.addEventListener('click', function () {
+    setTimeout(function () { if (lastWeather) renderWeather(lastWeather, getCurrentLanguage()); }, 150);
+});
+</script>
+
+<!-- Vercel Web Analytics (επισκέψεις/σελίδες) -->
+<script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+<!-- Vercel Speed Insights (ταχύτητα σελίδας / Core Web Vitals) -->
+<script>
+    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+<div id="dynamicLightbox" class="lightbox-modal">
+  <span class="lightbox-close" onclick="closeDynamicLightbox()">&times;</span>
+  <div class="lightbox-content">
+    <img id="dynLightboxMain" class="lightbox-main-img">
+    <a id="dynLightboxPrev" class="lightbox-prev" onclick="changeDynSlide(-1)">&#10094;</a>
+    <a id="dynLightboxNext" class="lightbox-next" onclick="changeDynSlide(1)">&#10095;</a>
+    <div id="dynLightboxNum" class="lightbox-number"></div>
+    <div id="dynLightboxThumbs" class="lightbox-thumbnails-row"></div>
+  </div>
+</div>
+</body>
+</html>

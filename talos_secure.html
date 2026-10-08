@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talos Secure - Apollo Project</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; transition: margin-left 0.3s; }
+        header { background: linear-gradient(135deg, #16375e 0%, #235a99 100%); color: #fff; padding: 30px 20px; text-align: center; border-bottom: 4px solid #ff7420; }
+        .back-btn { display: inline-block; margin: 20px 0; padding: 10px 20px; background-color: #235a99; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold; transition: background 0.2s; border-bottom: 2px solid #16375e; }
+        .back-btn:hover { background-color: #ff7420; border-bottom-color: #df5f18; }
+        .container { max-width: 800px; margin: 30px auto; padding: 25px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ff7420; }
+        h1 { color: #fff; margin: 0; }
+        h2 { color: #235a99; }
+        
+        .menu-btn { position: fixed; top: 20px; left: 20px; background-color: #ff7420; color: white; border: none; padding: 10px 15px; font-size: 1.2em; border-radius: 4px; cursor: pointer; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .menu-btn:hover { background-color: #235a99; }
+        
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 999; top: 0; left: 0; background-color: #16375e; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 5px rgba(0,0,0,0.2); }
+        .sidebar-title { color: #ff7420; padding: 10px 25px; font-size: 1.2em; font-weight: bold; border-bottom: 1px solid #235a99; margin-bottom: 10px; }
+        .sidebar a { padding: 12px 25px; text-decoration: none; font-size: 0.95em; color: #e2e8f0; display: inline-flex; align-items: center; width: 100%; box-sizing: border-box; transition: 0.2s; white-space: nowrap; }
+        .sidebar a:hover { background-color: #235a99; color: #fff; padding-left: 35px; }
+        .sidebar a.active { border-left: 4px solid #ff7420; background-color: #1f4a7c; }
+
+        .sidebar.open { width: 260px; }
+        body.sidebar-open { margin-left: 260px; }
+
+        ul { line-height: 1.6; list-style: none; padding-left: 0; }
+        li { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dashed #e2e8f0; }
+        .item-row { display: flex; align-items: flex-start; width: 100%; }
+        input[type="checkbox"] { accent-color: #ff7420; width: 18px; height: 18px; margin-right: 12px; margin-top: 4px; cursor: pointer; flex-shrink: 0; }
+        
+        .item-desc-link { color: #235a99; text-decoration: none; transition: color 0.2s; font-weight: 500; width: 100%; }
+        .item-desc-link:hover { color: #ff7420; text-decoration: underline; }
+        .yt-logo { width: 20px; height: 20px; fill: #ff0000; margin-left: 6px; vertical-align: middle; display: inline-block; flex-shrink: 0; }
+        
+        .item-desc-plain { color: #333; font-weight: 500; }
+        .sidebar-logo { width: 18px; height: 18px; margin-right: 10px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; vertical-align: middle; }
+        .spec-box { background: #e2e8f0; padding: 15px; border-radius: 4px; margin-top: 20px; font-size: 0.95em; border-left: 3px solid #235a99; }
+        .spec-box strong { color: #ff7420; }
+    </style>
+</head>
+<body id="pageBody">
+
+<button class="menu-btn" onclick="toggleNav()" id="menuBtn">☰</button>
+
+<div id="mySidebar" class="sidebar">
+    <div class="sidebar-title">PROJECT MAP</div>
+    <a href="index.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://w3.org"><path d="M4 2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v3h4V4H4zm6 0v3h4V4h-4zm6 0v3h4V4h-4zM4 9v3h4V9H4zm6 0v3h4V9h-4zm6 0v3h4V9h-4zm-6 8h4v5h-4v-5zm-2 5h-1v-4l4-1v5h-3z" /></svg>
+        Apollo Project Home
+    </a>
+    <a href="phaethons_grid.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://w3.org"><path d="M19 12h-2.58l-2.48-4.34A2 2 0 0 0 12.2 6.6H7.5A3.5 3.5 0 0 0 4 10.1v1.4a2.5 2.5 0 0 0 2 2.45v2.1a3.5 3.5 0 1 0 2 .1v-2.15h4.15l1.64 2.87a2 2 0 0 0 1.74 1h3.47a1 1 0 0 0 0-2h-3.47l-1.37-2.4H19a1 1 0 0 0 0-2zm-11 5a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 8 17zm-2-5.45v-1.45A1.5 1.5 0 0 1 7.5 8.6h4.7a.5.5 0 0 1 .43.26l2 3.5H6z"/></svg>
+        1. Phaethon’s Grid
+    </a>
+    <a href="zeus_switch.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://w3.org"><path d="M19 9h-5.63l1.83-7.14a.5.5 0 0 0-.84-.45l-9.92 11.23a.5.5 0 0 0 .37.83h5.63l-1.83 7.14a.5.5 0 0 0 .84.45l9.92-11.23A.5.5 0 0 0 19 9z"/></svg>
+        2. Zeus Switch
+    </a>
+    <a href="flying_dutchman.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://w3.org"><path d="M19 14.5a2.5 2.5 0 0 0-2.5-2.5H3a1 1 0 1 0 0 2h13.5a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5H11a1 1 0 1 0 0 2h5.5a2.5 2.5 0 0 0 2.5-2.5zm1-5a2.5 2.5 0 0 0-2.5-2.5H4a1 1 0 0 0 0 2h13.5a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5H13a1 1 0 1 0 0 2h4.5A2.5 2.5 0 0 0 20 9.5z"/></svg>
+        3. Voreas & Dutchman
+    </a>
+    <a href="ariadnes_thread.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><path d="M6 9a4 4 0 0 1 6 0M4.5 12.5a4.5 4.5 0 0 1 9 0M9 6a6 6 0 0 1 3 5.19"/><path d="M15 12c2.5 0 3-3 5-3s2.5 2 4 2" stroke-width="1.8"/></g></svg>
+        4. Ariadne’s Thread
+    </a>
+    <a href="cronus_vault.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4h2v2M15 6V4h2v2M7 11h4M7 15h10"/></g></svg>
+        5. Cronus Vault
+    </a>
+    <a href="argus_vision.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><path d="M12 9a3 3 0 0 1 .5 0M9 12a3 3 0 0 1 0-.5"/></g></svg>
+        6. Argus Vision
+    </a>
+    <a href="daedalus_code.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M6 6h12v4H10v4h8v4"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="18" cy="18" r="1" fill="currentColor"/><path d="M14 10v4"/></g></svg>
+        7. Daedalus Code
+    </a>
+    <a href="chirons_tests.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M2 17h20M6 21h12M12 17v4M6 10l3-3 4 6 2-3h3"/></g></svg>
+        8. Chiron’s Tests
+    </a>
+    <a href="talos_secure.html" class="active">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M13 7h-2l-2 5h3l-1 5 4-6h-2z" fill="currentColor" stroke="none"/></g></svg>
+        9. Talos Secure
+    </a>
+    <a href="genesis_spark.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2Q12 12 2 12Q12 12 12 22Q12 12 22 12Q12 12 12 2" /><path d="M12 8v8M8 12h8" stroke-width="1.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></g></svg>
+        10. Genesis Spark
+    </a>
+    <a href="themis_audit.html">
+        <svg class="sidebar-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v17M19 7H5M5 7l-2 5h4zm14 0l-2 5h4zM9 19h6"/><path d="M4.5 10l.5 1M18.5 10l.5 1" stroke-width="1.5"/><path d="M4.5 9.5l.5-2M18.5 9.5l.5-2" stroke-width="1.5"/><path d="M18.5 10.5l.5.5-1 1.5" stroke-width="1.5"/><path d="M4.5 11l.5-2.5h1l-.5 2" stroke-width="1.5"/></g></svg>
+        11. Themis Audit
+    </a>
+</div>
+
+    <header>
+        <h1>Talos Secure</h1>
+        <p>Safety Audits & Isolation Inspections</p>
+    </header>
+    <div style="max-width: 800px; margin: auto; padding: 0 20px;">
+        <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    </div>
+    <div class="container">
+        <h2>Scope of Work</h2>
+        <p> Safety parameters confirmation, insulation barrier testing, RCD breaker speed profiling, and emergency shutdown validation. </p>
+        
+        <h2>Installation Checklist</h2>
+        <ul>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <a href="https://youtube.com" target="_blank" class="item-desc-link">
+                    <span>Perform Megger insulation tests across PV arrays and AC wiring.</span><svg class="yt-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <a href="https://youtube.com" target="_blank" class="item-desc-link">
+                    <span>Perform an RCD trip time test using a dedicated installation tester.</span><svg class="yt-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <a href="https://youtube.com" target="_blank" class="item-desc-link">
+                    <span>Verify functionality of the physical emergency shutdown push button.</span><svg class="yt-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <a href="https://youtube.com" target="_blank" class="item-desc-link">
+                    <span>Check configuration of the internal grounding relay inside the MultiPlus.</span><svg class="yt-logo" viewBox="0 0 24 24" xmlns="http://w3.org"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <span class="item-desc-plain">Affix clear electrical shock warning labels on all enclosures.</span>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <span class="item-desc-plain">Task 6 Description</span>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <span class="item-desc-plain">Task 7 Description</span>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <span class="item-desc-plain">Task 8 Description</span>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <span class="item-desc-plain">Task 9 Description</span>
+            </div>
+        </li>
+        <li>
+            <div class="item-row">
+                <input type="checkbox" checked> 
+                <span class="item-desc-plain">Task 10 Description</span>
+            </div>
+        </li>
+    </ul>
+    
+    <div class="spec-box">
+        <strong>Engineering Notes: The grounding relay must properly bridge AC Neutral to Earth during autonomous island operation.</strong>
+    </div>
+</div>
+
+<script>
+    function toggleNav() {
+        var sidebar = document.getElementById("mySidebar");
+        var body = document.getElementById("pageBody");
+        var btn = document.getElementById("menuBtn");
+        
+        sidebar.classList.toggle("open");
+        body.classList.toggle("sidebar-open");
+        
+        if (sidebar.classList.contains("open")) {
+            btn.innerHTML = "✕";
+        } else {
+            btn.innerHTML = "☰";
+        }
+    }
+</script>
+</body>
+</html>

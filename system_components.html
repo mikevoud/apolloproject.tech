@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Components – Apollo Project</title>
+    <style>
+        /* Βασικές μεταβλητές χρωμάτων (Κανονικό Θέμα) */
+        :root {
+            --bg-color: #f4f6f9;
+            --text-color: #333;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --card-text: #555;
+            --border-color: rgba(226, 232, 240, 0.8);
+            --header-gradient: linear-gradient(135deg, #16375e 0%, #235a99 100%);
+            --victron-orange: #ff7420;
+            --victron-blue: #235a99;
+
+            /* ΣΤΑΘΕΡΑ ΧΡΩΜΑΤΑ SIDEBAR (RAL 5012) */
+            --sidebar-bg: #3b8ebb;
+            --sidebar-hover: #235a99;
+            --sidebar-active: #16375e;
+            --sidebar-text: #e2e8f0;
+            /* Λευκό/Γκρι κείμενο στο κανονικό mode */
+            --glass-blur: blur(12px);
+        }
+
+        /* Μεταβλητές χρωμάτων για το Night Mode */
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-text: #cbd5e1;
+            --border-color: rgba(51, 65, 85, 0.5);
+            --header-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --victron-blue: #38bdf8;
+
+            /* Η Sidebar παραμένει RAL 5012 στο Night Mode */
+            --sidebar-bg: #3b8ebb;
+            --sidebar-hover: #235a99;
+            --sidebar-active: #16375e;
+
+            /* ΑΛΛΑΓΗ: Η γραμματοσειρά γίνεται μπλε όπως το φόντο του τίτλου */
+            --sidebar-text: #16375e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            margin-left: calc(260px + 2ch);
+            transition: background-color 0.3s, color 0.3s, margin-left 0.3s;
+        }
+
+        header {
+            background: var(--header-gradient);
+            color: var(--victron-blue);
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--victron-orange);
+        }
+
+        header h1 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            font-size: 3.8em;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #e0f2fe !important;
+        }
+
+        header p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 12px 0 0;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #e0f2fe !important;
+            opacity: 0.95;
+        }
+
+        [data-theme="dark"] header h1,
+        [data-theme="dark"] header p,
+        [data-theme="dark"] .theme-toggle-inline {
+            color: var(--victron-blue) !important;
+        }
+
+        /* ΜΠΑΡΕΣ ΠΡΟΟΔΟΥ ΚΑΙ ENOTHTEΣ */
+        .progress-section {
+            max-width: 1400px;
+            margin: 30px auto 10px auto;
+            padding: 0 20px;
+        }
+
+        .progress-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .progress-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: 'Segoe UI', sans-serif !important;
+            font-size: 1.6em !important;
+            font-weight: 700 !important;
+            color: var(--victron-orange) !important;
+        }
+
+        .progress-container-bar {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 10px;
+            height: 16px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--victron-orange);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .card-progress-wrapper {
+            margin-top: 15px;
+        }
+
+        .card-progress-bar-container {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 6px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .card-progress-bar-fill {
+            height: 100%;
+            background-color: var(--victron-orange);
+            width: 0%;
+            transition: width 0.4s ease-out;
+        }
+
+        .card-progress-text {
+            display: block;
+            text-align: right;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: var(--victron-orange);
+            margin-top: 4px;
+        }
+
+        /* ΠΛΑΪΝΗ ΜΠΑΡΑ (SIDEBAR STYLE) */
+        .sidebar {
+            height: 100%;
+            width: 260px;
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            background-color: var(--sidebar-bg);
+            overflow-x: hidden;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, background-color 0.3s;
+        }
+
+        .menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+        }
+
+        .sidebar-title {
+            color: var(--victron-orange);
+            padding: 10px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            padding: 12px 25px;
+            text-decoration: none;
+            font-size: 0.95em;
+            color: var(--sidebar-text);
+            display: inline-flex;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            transition: 0.2s, background-color 0.3s, color 0.2s;
+            white-space: nowrap;
+        }
+
+        .sidebar a svg {
+            fill: currentColor;
+        }
+
+        .sidebar a:hover {
+            background-color: var(--sidebar-hover);
+            color: #fff !important;
+            padding-left: 35px;
+        }
+
+        .sidebar a.active {
+            border-left: 4px solid var(--victron-orange);
+            background-color: var(--sidebar-active);
+        }
+
+        /* ΔΙΑΚΟΠΤΗΣ ΚΑΙ SLIDER */
+        .theme-toggle-row {
+            padding: 15px 25px;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+            /* Σπρώχνει το toggle τέρμα κάτω στη μπάρα */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #e2e8f0;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 22px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--victron-orange);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        /* BENTO GRID ΚΑΙ ΚΑΡΤΕΣ */
+        .container {
+            max-width: 1400px;
+            margin: 20px auto 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        .grid-item {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--victron-blue);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s;
+        }
+
+        .grid-item.bento-wide {
+            grid-column: span 2;
+        }
+
+        .card-progress-wrapper {
+            margin-top: auto;
+            padding-top: 15px;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-5px);
+            border-left-width: 7px;
+            border-left-color: var(--victron-orange);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .card-title-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .grid-item:hover .card-title-row {
+            transform: translateX(3px);
+        }
+
+        .card-title-row h2 {
+            margin: 0;
+            font-size: 1.4em;
+            color: var(--victron-blue) !important;
+        }
+
+        .card-logo {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+
+        .grid-item p {
+            margin: 0;
+            line-height: 1.6;
+            color: var(--card-text);
+            transition: color 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .grid-item p strong {
+            color: var(--victron-orange);
+        }
+
+        /* HARDWARE CATALOG */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .vault-item {
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+        }
+
+        .vault-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+            background: var(--card-bg);
+        }
+
+        .vault-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .hardware-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .hardware-name {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .hardware-yt-link {
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .hardware-yt-link:hover {
+            transform: scale(1.15);
+        }
+
+        .hardware-caption {
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: var(--card-text);
+        }
+
+        .vault-title {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            font-size: 1.6em !important;
+            font-weight: 700 !important;
+            color: var(--victron-blue) !important;
+            margin: 0;
+        }
+        .component-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--victron-blue) !important;
+    margin: 0 0 20px 0;
+}
+
+        /* ΣΤΥΛ ΓΙΑ ΤΗ ΔΙΠΛΗ ΓΛΩΣΣΑ */
+        .lang-el {
+            display: none;
+        }
+
+        .lang-btn {
+            position: absolute;
+            top: 20px;
+            right: 150px;
+            margin: 0;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: #e2e8f0;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 700;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .lang-btn:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        [data-theme="dark"] .sidebar a.active {
+            color: #e2e8f0 !important;
+        }
+
+        /* --- ΔΥΝΑΜΙΚΟ LIGHTBOX GALLERY --- */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            padding-top: 40px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+        }
+
+        .lightbox-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: auto;
+            padding: 0 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .lightbox-main-img {
+            width: 100%;
+            height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+        }
+
+        .lightbox-close {
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10002;
+            transition: color 0.2s;
+        }
+
+        .lightbox-close:hover {
+            color: var(--victron-orange);
+        }
+
+        .lightbox-prev,
+        .lightbox-next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 16px;
+            margin-top: -50px;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            transition: 0.2s ease;
+            border-radius: 4px;
+            user-select: none;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .lightbox-next {
+            right: 10px;
+        }
+
+        .lightbox-prev {
+            left: 10px;
+        }
+
+        .lightbox-prev:hover,
+        .lightbox-next:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--victron-orange);
+        }
+
+        .lightbox-number {
+            color: #cbd5e1;
+            font-size: 0.85em;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 8px 0;
+            text-align: left;
+        }
+
+        .lightbox-thumbnails-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .lightbox-thumb {
+            opacity: 0.4;
+            width: 70px;
+            height: 50px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 4px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .lightbox-thumb.active-thumb,
+        .lightbox-thumb:hover {
+            opacity: 1;
+            border-color: var(--victron-orange);
+        }
+
+        /* --- RESPONSIVE MEDIA QUERIES ΓΙΑ ΚΙΝΗΤΑ ΚΑΙ ΤΑΜΠΛΕΤ --- */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid-item.bento-wide {
+                grid-column: span 1;
+            }
+
+            .vault-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            body {
+                margin-left: 0;
+                /* Αφαιρείται το μεγάλο περιθώριο στα αριστερά */
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                /* Κρύβεται η sidebar έξω από την οθόνη */
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                /* Εμφανίζεται με slide-in εφέ */
+            }
+
+            .menu-btn {
+                display: block !important;
+                /* Εμφάνιση κουμπιού μενού */
+            }
+
+            header {
+                padding: 60px 20px 30px 20px;
+            }
+
+            header h1 {
+                font-size: 2.2em;
+                /* Μικραίνει ο τίτλος για να χωράει */
+            }
+
+            header p {
+                font-size: 1.2em;
+            }
+
+            .lang-btn {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 15px auto 0 auto;
+                display: inline-block;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .container,
+            .vault-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-label-row {
+                font-size: 1.2em !important;
+            }
+
+            .lightbox-main-img {
+                height: 50vh;
+                /* Λιγότερο ύψος στα κινητά για να μην κρύβει τα thumbnails */
+            }
+
+            .lightbox-prev,
+            .lightbox-next {
+                padding: 10px;
+                font-size: 18px;
+            }
+        }
+        /* Στυλ για το Full Width Πάνελ */
+/* Εξωτερικό Container - Απόλυτα συμβατό με το δικό σας layout */
+.vrm-custom-dashboard {
+    width: 100%;
+    margin: 0 auto 30px auto;
+    padding: 25px;
+    box-sizing: border-box;
+    background: inherit;
+    color: inherit;
+    font-family: inherit;
+}
+
+/* Διαχωριστικοί Τίτλοι Ενοτήτων */
+.vrm-section-divider {
+    margin: 30px 0 15px 0;
+    font-size: 1.1rem;
+    color: #fbbf24; /* Το χρυσό/κίτρινο του Apollo Project */
+    border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+    padding-bottom: 5px;
+}
+
+/* Grid Layout για 4 ή 6 κάρτες ανά σειρά */
+.vrm-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Εσωτερικές Κάρτες */
+.vrm-card {
+    background: rgba(128, 128, 128, 0.07);
+    padding: 15px 20px;
+    border-radius: 6px;
+    border-left: 4px solid #64748b;
+    color: inherit;
+}
+
+.vrm-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: rgba(128, 128, 128, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dark .vrm-card h3, body.dark .vrm-card h3, body.dark-mode .vrm-card h3 {
+    color: #94a3b8;
+}
+
+.vrm-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: inherit;
+}
+
+.vrm-subtext {
+    font-size: 0.8rem;
+    color: rgba(128, 128, 128, 0.7);
+}
+
+.dark .vrm-subtext, body.dark .vrm-subtext, body.dark-mode .vrm-subtext {
+    color: #94a3b8;
+}
+
+/* Χρωματικοί δείκτες αριστερής λωρίδας καρτών */
+.battery-card { border-left-color: #10b981; }
+.solar-card { border-left-color: #fbbf24; }
+.load-card { border-left-color: #ef4444; }
+.grid-card { border-left-color: #a855f7; }
+.temp-card { border-left-color: #06b6d4; }
+.system-card { border-left-color: #3b82f6; }
+.peak-card { border-left-color: #f97316; } /* Πορτοκαλί */
+.battery-efficiency-card { border-left-color: #84cc16; } /* Λαχανί */
+
+.status-online { color: #10b981 !important; }
+
+/* ΠΛΕΓΜΑ ΓΡΑΦΗΜΑΤΩΝ (ΚΑΤΩ ΜΕΡΟΣ) */
+.vrm-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.vrm-chart-box {
+    background: rgba(128, 128, 128, 0.04);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+.vrm-chart-box h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    color: inherit;
+    font-weight: 600;
+}
+
+/* Διαχείριση Γλώσσας */
+html[lang="en"] .lang-el { display: none !important; }
+html[lang="el"] .lang-en { display: none !important; }
+body.en .lang-el { display: none !important; }
+body.el .lang-en { display: none !important; }
+
+@media (max-width: 600px) {
+    .vrm-charts-grid { grid-template-columns: 1fr; }
+}
+
+
+/* ΠΡΟΒΛΕΨΗ ΠΑΡΑΓΩΓΗΣ ΑΝΑ ΠΕΔΙΟ (Open-Meteo) */
+.wx-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.wx-day {
+    background: rgba(128, 128, 128, 0.07);
+    border: 1px solid rgba(128, 128, 128, 0.14);
+    border-radius: 10px;
+    padding: 16px 18px;
+}
+.wx-day-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.wx-day-icon { font-size: 2.1rem; line-height: 1; }
+.wx-day-title { font-weight: 700; font-size: 1.05rem; }
+.wx-day-meta { font-size: 0.78rem; color: rgba(128, 128, 128, 0.95); margin-top: 2px; }
+.wx-field { margin: 12px 0; }
+.wx-field-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.wx-field-name { font-weight: 600; font-size: 0.88rem; }
+.wx-field-sub { font-weight: 400; font-size: 0.72rem; opacity: 0.7; margin-left: 4px; }
+.wx-field-val { font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.wx-bar { height: 8px; border-radius: 6px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin-top: 6px; }
+.wx-bar > span { display: block; height: 100%; border-radius: 6px; }
+.wx-bar.east > span { background: #fbbf24; }
+.wx-bar.west > span { background: #f97316; }
+.wx-total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 14px; padding-top: 10px;
+    border-top: 1px solid rgba(128, 128, 128, 0.25);
+    font-weight: 700;
+}
+.wx-total-val { font-size: 1.25rem; color: var(--victron-orange); font-variant-numeric: tabular-nums; }
+
+/* ===== ΕΝΟΠΟΙΗΜΕΝΟ ΣΤΥΛ ΣΕ ΟΛΗ ΤΗ ΣΕΛΙΔΑ ===== */
+html { scroll-behavior: smooth; }
+::selection { background: var(--victron-orange); color: #fff; }
+a:focus-visible, button:focus-visible, input:focus-visible + .slider {
+    outline: 2px solid var(--victron-orange); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+/* Σωστά χρώματα στο dark mode (το θέμα χρησιμοποιεί data-theme) */
+[data-theme="dark"] .vrm-card h3,
+[data-theme="dark"] .vrm-subtext { color: #94a3b8; }
+
+/* Ενιαίο ύφος με τις κύριες κάρτες */
+.vrm-section-divider { color: var(--victron-orange); font-weight: 700; letter-spacing: 0.3px; }
+.vrm-card {
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    border-left-width: 4px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
+}
+.vrm-card:hover, .wx-day:hover, .vrm-chart-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+.wx-day, .vrm-chart-box { transition: transform 0.25s, box-shadow 0.25s; }
+.vrm-value { font-size: 1.7rem; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
+.vrm-chart-box { border-radius: 12px; }
+
+/* Μπάρα φόρτισης μπαταρίας */
+.soc-bar { height: 8px; border-radius: 6px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin: 8px 0 6px; }
+.soc-bar > span { display: block; height: 100%; width: 0; border-radius: 6px; background: #10b981; transition: width 0.6s ease, background-color 0.3s; }
+
+/* Δείκτης κατάστασης */
+.status-live { color: #10b981 !important; }
+.status-demo { color: #fbbf24 !important; }
+.status-offline { color: #ef4444 !important; }
+
+/* Συμπτυσσόμενες ενότητες */
+.vrm-section-divider { cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+.vrm-section-divider::after { content: '▾'; font-size: 1rem; transition: transform 0.25s; }
+.vrm-section-divider.collapsed::after { transform: rotate(-90deg); }
+.vrm-section-divider.collapsed + .vrm-section-body { display: none; }
+
+/* Εφέ φόρτωσης (skeleton) */
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.vrm-value.skeleton {
+    color: transparent !important; width: 60%; border-radius: 6px;
+    background: linear-gradient(90deg, rgba(128,128,128,0.15) 25%, rgba(128,128,128,0.32) 50%, rgba(128,128,128,0.15) 75%);
+    background-size: 200% 100%; animation: shimmer 1.4s infinite linear;
+}
+
+/* Sidebar */
+.sidebar { background-image: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.12)); scrollbar-width: thin; }
+.sidebar-title { font-size: 1.05em; letter-spacing: 1.5px; text-transform: uppercase; }
+.sidebar a { margin: 2px 12px; width: calc(100% - 24px); border-radius: 8px; }
+.sidebar a.active { border-left-width: 4px; }
+
+/* Header */
+header { background-image: radial-gradient(circle at 80% 0%, rgba(255,255,255,0.12), transparent 55%), var(--header-gradient); }
+header h1 { font-size: clamp(2rem, 5vw, 3.8rem); letter-spacing: 2px; text-shadow: 0 2px 14px rgba(0,0,0,0.3); }
+header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
+
+/* Κατάλογος / κάρτες */
+.card-logo { box-sizing: content-box; padding: 8px; border-radius: 10px; background: color-mix(in srgb, var(--victron-blue) 14%, transparent); }
+.progress-bar-fill, .card-progress-bar-fill { background-image: linear-gradient(90deg, var(--victron-orange), #ffa05a); }
+.vault-item { overflow: hidden; }
+.vault-item img { transition: transform 0.4s ease; }
+.vault-item:hover img { transform: scale(1.04); }
+
+/* Συμπτυσσόμενες ενότητες σελίδας (προεπιλογή: κλειστές) */
+.collapsible-title { cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.collapsible-title::after { content: '▾'; font-size: 1.1rem; color: var(--victron-orange); transition: transform 0.25s; }
+.collapsible-title.collapsed::after { transform: rotate(-90deg); }
+.collapsible-title.collapsed { margin-bottom: 0 !important; }
+.collapsible-title:hover { opacity: 0.85; }
+
+/* Το Live Telemetry σε κουτί ίδιο με τα υπόλοιπα (progress-card) */
+.vrm-custom-dashboard {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 25px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--victron-orange);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+.vrm-custom-dashboard > .component-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--victron-blue) !important;
+    margin: 0 0 20px 0;
+}
+
+/* Εικονίδια SVG στους τίτλους των κουτιών */
+.vault-title, .vrm-custom-dashboard > .component-title { display: flex; align-items: center; }
+.title-icon {
+    width: 1.15em; height: 1.15em; margin-right: 12px; flex-shrink: 0;
+    fill: none; stroke: var(--victron-orange); stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+}
+.collapsible-title { justify-content: flex-start; }
+.collapsible-title::after { margin-left: auto; }
+
+/* Σύνδεσμος System Components */
+.components-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--victron-orange); color: #fff !important; text-decoration: none;
+    font-weight: 700; padding: 10px 20px; border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.components-link:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.18); }
+.back-link { display: inline-block; margin-bottom: 4px; color: var(--victron-blue); font-weight: 700; text-decoration: none; }
+.back-link:hover { text-decoration: underline; }
+
+/* Εικονίδια καρτών: ενιαίο στυλ γραμμών */
+.card-logo { fill: none !important; stroke: currentColor !important; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--victron-blue); }
+    
+/* Sidebar: long labels wrap instead of being cut off */
+.sidebar a { white-space: normal; line-height: 1.25; }
+</style>
+</head>
+
+<body id="pageBody">
+
+    <div id="mySidebar" class="sidebar">
+        <div class="sidebar-title">
+            <span class="lang-en">Project Map</span>
+            <span class="lang-el">Χάρτης Έργου</span>
+        </div>
+        <a href="index.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M4 2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v3h4V4H4zm6 0v3h4V4h-4zm6 0v3h4V4h-4zM4 9v3h4V9H4zm6 0v3h4V9h-4zm6 0v3h4V9h-4zm-6 8h4v5h-4v-5zm-2 5h-1v-4l4-1v5h-3z" />
+            </svg>
+            <span class="lang-en">Apollo Project Home</span>
+            <span class="lang-el">Αρχική Apollo Project</span>
+        </a>
+        <a href="system_components.html" class="active">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path fill-rule="evenodd" d="M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm1 3v6h6V9H9z" /><path d="M9 2h2v3H9zM13 2h2v3h-2zM9 19h2v3H9zM13 19h2v3h-2zM2 9h3v2H2zM2 13h3v2H2zM19 9h3v2h-3zM19 13h3v2h-3z" />            </svg>
+            <span class="lang-en">System Components</span>
+            <span class="lang-el">Εξαρτήματα Συστήματος</span>
+        </a>
+        <a href="production_calculator.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path fill-rule="evenodd" d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm1 3v3h10V6H7zm0 5v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zm-8 4v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z" />
+            </svg>
+            <span class="lang-en">Shades &amp; Production Calculator</span>
+            <span class="lang-el">Υπολογιστής Σκιάσεων &amp; Παραγωγής</span>
+        </a>
+        <a href="phaethons_grid.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M19 12h-2.58l-2.48-4.34A2 2 0 0 0 12.2 6.6H7.5A3.5 3.5 0 0 0 4 10.1v1.4a2.5 2.5 0 0 0 2 2.45v2.1a3.5 3.5 0 1 0 2 .1v-2.15h4.15l1.64 2.87a2 2 0 0 0 1.74 1h3.47a1 1 0 0 0 0-2h-3.47l-1.37-2.4H19a1 1 0 0 0 0-2zm-11 5a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 8 17zm-2-5.45v-1.45A1.5 1.5 0 0 1 7.5 8.6h4.7a.5.5 0 0 1 .43.26l2 3.5H6z" />
+            </svg>
+            <span class="lang-en">-Phaethon’s Grid</span>
+            <span class="lang-el">-Πλέγμα Φαέθωνα</span>
+        </a>
+        <a href="zeus_switch.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M19 9h-5.63l1.83-7.14a.5.5 0 0 0-.84-.45l-9.92 11.23a.5.5 0 0 0 .37.83h5.63l-1.83 7.14a.5.5 0 0 0 .84.45l9.92-11.23A.5.5 0 0 0 19 9z" />
+            </svg>
+            <span class="lang-en">-Zeus Switch</span>
+            <span class="lang-el">-Διακόπτης Δία</span>
+        </a>
+        <a href="flying_dutchman.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path
+                    d="M19 14.5a2.5 2.5 0 0 0-2.5-2.5H3a1 1 0 1 0 0 2h13.5a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5H11a1 1 0 1 0 0 2h5.5a2.5 2.5 0 0 0 2.5-2.5zm1-5a2.5 2.5 0 0 0-2.5-2.5H4a1 1 0 0 0 0 2h13.5a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5H13a1 1 0 1 0 0 2h4.5A2.5 2.5 0 0 0 20 9.5z" />
+            </svg>
+            <span class="lang-en">-Voreas & Flying Dutchman</span>
+            <span class="lang-el">-Βορέας & Ιπτάμενος Ολλανδός</span>
+        </a>
+        <a href="ariadnes_thread.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <circle cx="9" cy="12" r="6" />
+                <path
+                    d="M6 9a4 4 0 0 1 6 0M4.5 12.5a4.5 4.5 0 0 1 9 0M9 6a6 6 0 0 1 3 5.19M15 12c2.5 0 3-3 5-3s2.5 2 4 2"
+                    stroke-width="1.8" />
+            </svg>
+            <span class="lang-en">-Ariadne’s Thread</span>
+            <span class="lang-el">-Μήτος της Αριάδνης</span>
+        </a>
+        <a href="cronus_vault.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="18" height="14" rx="2" />
+                <path d="M7 6V4h2v2M15 6V4h2v2M7 11h4M7 15h10" />
+            </svg>
+            <span class="lang-en">-Cronus Vault</span>
+            <span class="lang-el">-Κρύπτη του Κρόνου</span>
+        </a>
+        <a href="argus_vision.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 9a3 3 0 0 1 .5 0M9 12a3 3 0 0 1 0-.5" />
+            </svg>
+            <span class="lang-en">-Argus Vision</span>
+            <span class="lang-el">-Άργος ο Πανόπτης</span>
+        </a>
+        <a href="daedalus_code.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <rect x="2" y="2" width="20" height="20" rx="4" />
+                <path d="M6 6h12v4H10v4h8v4M14 10v4" />
+                <circle cx="6" cy="6" r="1" fill="currentColor" />
+                <circle cx="18" cy="18" r="1" fill="currentColor" />
+            </svg>
+            <span class="lang-en">-Daedalus Code</span>
+            <span class="lang-el">-Κώδικας του Δαιδάλου</span>
+        </a>
+        <a href="chirons_tests.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M2 17h20M6 21h12M12 17v4M6 10l3-3 4 6 2-3h3" />
+            </svg>
+            <span class="lang-en">-Chiron’s Tests</span>
+            <span class="lang-el">-Μυαλό του Χείρων</span>
+        </a>
+        <a href="talos_secure.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M13 7h-2l-2 5h3l-1 5 4-6h-2z" fill="currentColor" stroke="none" />
+            </svg>
+            <span class="lang-en">-Talos Secure</span>
+            <span class="lang-el">-Φύλακας Τάλος</span>
+        </a>
+        <a href="genesis_spark.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M12 2Q12 12 2 12Q12 12 12 22Q12 12 22 12Q12 12 12 2" />
+                <path d="M12 8v8M8 12h8" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="1" fill="currentColor" />
+            </svg>
+            <span class="lang-en">-Genesis Spark</span>
+            <span class="lang-el">-Σπίθα της Γένεσις</span>
+        </a>
+        <a href="themis_audit.html">
+            <svg class="sidebar-logo" viewBox="0 0 24 24">
+                <path d="M12 3v17M8 20h8M3 7h18M5 7l-2 5h4zm14 0l-2 5h4z" />
+                <path d="M4.5 10l.5 1M18.5 10l.5 1" stroke-width="1.5" />
+                <path d="M4.5 9.5l.5-2M18.5 9.5l.5-2" stroke-width="1.5" />
+                <path d="M18.5 10.5l.5.5-1 1.5" stroke-width="1.5" />
+                <path d="M4.5 11l.5-2.5h1l-.5 2" stroke-width="1.5" />
+            </svg>
+            <span class="lang-en">-Themis Audit</span>
+            <span class="lang-el">-Έλεγχος της Θέμιδος</span>
+        </a>
+
+        <!-- TOTAL PROGRESS -->
+        <div style="padding: 20px 25px 15px 25px; border-top: 1px solid var(--border-color); box-sizing: border-box;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; font-family: 'Segoe UI', sans-serif; font-size: 0.75em; font-weight: 700; color: var(--victron-orange) !important; margin-bottom: 6px; letter-spacing: 1px;">
+                <span class="lang-en">TOTAL PROGRESS</span>
+                <span class="lang-el">ΣΥΝΟΛΙΚΗ ΠΡΟΟΔΟΣ</span>
+                <span id="progressPercentage">0%</span>
+            </div>
+            <div
+                style="width: 100%; background-color: var(--border-color); border-radius: 4px; height: 6px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
+                <div id="progressBar"
+                    style="height: 100%; background-color: var(--victron-orange); width: 0%; transition: width 0.5s ease-in-out;">
+                </div>
+            </div>
+        </div>
+
+        <!-- ADVERTISEMENT -->
+        <div
+            style="padding: 10px 20px 20px 20px; flex-grow: 1; display: flex; flex-direction: column; box-sizing: border-box;">
+            <a href="https://victronenergy.com" target="_blank"
+                style="background: rgba(56, 189, 248, 0.04); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px dashed #38bdf8; border-radius: 8px; padding: 25px 10px; text-align: center; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; cursor: pointer; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.background='rgba(56, 189, 248, 0.07)'; this.style.boxShadow='0 4px 12px rgba(56, 189, 248, 0.1)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(56, 189, 248, 0.04)'; this.style.boxShadow='none';">
+                <svg viewBox="0 0 24 24"
+                    style="width: 32px; height: 32px; fill: none; stroke: #38bdf8; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; margin-bottom: 8px;">
+                    <rect x="2" y="2" width="20" height="20" rx="2" />
+                    <path d="M7 8h10M7 12h10M7 16h6" />
+                </svg>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.75em; font-weight: 700; color: #38bdf8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
+                    <span class="lang-en">Advertisement Gateway</span><span class="lang-el">Πύλη Διαφήμισης</span>
+                </div>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.9em; color: #ffffff !important; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px;">
+                    <span class="lang-en">Advertisement</span><span class="lang-el">Διαφήμιση</span>
+                </div>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; color: #e2e8f0 !important; opacity: 0.85; font-weight: 500; line-height: 1.4; max-width: 200px;">
+                    <span class="lang-en">Premium off-grid power systems.</span><span class="lang-el">Premium συστήματα
+                        αυτόνομης ισχύος.</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- ΔΙΟΡΘΩΜΕΝΟΣ HEADER ΜΕ ΤΟ DARK MODE ΚΑΤΩ ΔΕΞΙΑ -->
+    <header>
+        <!-- 1. ΠΡΟΣΘΕΤΕΤΕ ΤΟ ΚΟΥΜΠΙ ΤΗΣ ΓΛΩΣΣΑΣ ΕΔΩ -->
+        <button id="lang-toggle" class="lang-btn" onclick="switchLanguage()">Ελληνικά</button>
+
+        <h1>Apollo Project</h1>
+        <p>
+            <span class="lang-en">Home Solar System Installation & Commissioning</span>
+            <span class="lang-el">Εγκατάσταση & Θέση σε Λειτουργία Οικιακού Φωτοβολταϊκού</span>
+        </p>
+
+        <div class="theme-toggle-inline"
+            style="position: absolute; bottom: 15px; right: 30px; display: flex; align-items: center; gap: 10px; font-family: 'Segoe UI', sans-serif; font-size: 0.8em; color: #e0f2fe; font-weight: 600; z-index: 10;">
+            <span>🌙 Dark Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="themeCheckbox">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
+
+    <div class="progress-section" style="margin-top: 25px; margin-bottom: 0;">
+        <a href="index.html" class="back-link">← <span class="lang-en">Back to Apollo Project Home</span><span class="lang-el">Επιστροφή στην Αρχική</span></a>
+    </div>
+
+<!-- ============================================================================
+ 
+         2. ΠΩΣ ΝΑ ΣΥΝΔΕΣΕΤΕ ΒΙΝΤΕΟ (YOUTUBE):
+            - Βρείτε το tag <a href="https://youtube.com" ...>
+            - Αντικαταστήστε το "YOUR_VIDEO_ID" με το δικό σας ID ή ολόκληρο το link του βίντεο.
+            - Αν κάποιο υλικό δεν έχει βίντεο, σβήστε προσωρινά όλο το tag <a>...</a> 
+              για να κρυφτεί το κόκκινο YouTube λογότυπο.
+         ============================================================================ -->
+
+    <div class="progress-section" style="margin-top: 25px; margin-bottom: 0;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-orange); padding: 25px;">
+            <div class="vault-title" style="margin-bottom: 20px;">
+                <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg><span class="lang-en">System Components</span>
+                <span class="lang-el">Εξαρτήματα Συστήματος</span>
+            </div>
+            <div class="vault-grid">
+
+                <!-- ΥΛΙΚΟ 1: INVERTER -->
+                <div class="vault-item">
+                    <!-- Η εικόνα από το Cloudinary συνδεδεμένη με το Dynamic LightBox -->
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786434241/victron-multiplus-ii-48-6k5-100-50-230v.png"
+                        alt="Victron MultiPlus-II" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786434241/victron-multiplus-ii-48-6k5-100-50-230v.png,https://res.cloudinary.com/dt0szquq/image/upload/v1786434565/PMP482605012_MultiPlus-II_48-6k5-100-50_230V_Left.png,https://res.cloudinary.com/dt0szquq/image/upload/v1786434541/PMP482605012_MultiPlus-II_48-6k5-100-50_230V_Right.png,https://res.cloudinary.com/dt0szquq/image/upload/v1786434546/MultiPlus-II_48V_10kVA_230V_bottom.png,https://res.cloudinary.com/dt0szquq/image/upload/v1786434560/Multiplus-II_48V_3kVA_230V_connections_nw.png">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Victron MultiPlus II<br>48-6k5-100-50-230
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- ΠΕΡΙΓΡΑΦΗ ΜΕ ΠΛΗΡΗ ΣΤΟΙΧΙΣΗ (JUSTIFY) -->
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text);">
+                        <span class="lang-en">48V Inverter/Charger configuration. Handles peak dynamic inductive house
+                            loads and clean islanded grid transfers.</span>
+                        <span class="lang-el">Διαμόρφωση Αντιστροφέα/Φορτιστή 48V. Διαχειρίζεται αιχμές δυναμικών
+                            επαγωγικών φορτίων και καθαρές μεταγωγές σε αυτόνομο δίκτυο.</span>
+                    </div>
+
+
+                    <!-- ΕΝΟΤΗΤΑ: ΠΡΟΤΕΙΝΟΜΕΝΑ ΚΑΤΑΣΤΗΜΑΤΑ ΜΕ ΛΟΓΟΤΥΠΑ (WHERE TO BUY) -->
+                    <div
+                        style="margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color); text-align: center;">
+                        <div
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--text-color); margin-bottom: 12px;">
+                            <span class="lang-en">Where to buy:</span>
+                            <span class="lang-el">Προτεινόμενα καταστήματα:</span>
+                        </div>
+
+                        <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                            <!-- Κατάστημα 1:  -->
+                            <a href="https://frenchman-energy.eu/Victron-Multiplus-II-48-6K5-100-50-230V"
+                                target="_blank" title="frenchman-energy.eu"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437639/frenchman-energy.jpg"
+                                    alt="frenchman-energy.eu"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+
+                            <!-- Κατάστημα 2: -->
+                            <a href="https://heliosystems.gr/product/metatropeas-fortistis-victron-energy-multiplus-ii-48-6k5-100-50-230v/"
+                                target="_blank" title="Skroutz"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786440579/heliosystems.jpg"
+                                    alt="heliosystems"
+                                    style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+
+                            <!-- Κατάστημα 3: skroutz.gr -->
+                            <a href="https://www.skroutz.gr/s/65076734/victron-energy-multiplus-ii-48-6k5-100-50-gx-6500va-inverter-ischyos-me-tasi-eisodou-48v-monofasiko-pmp482606000.html"
+                                target="_blank" title="skroutz.gr"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437929/skroutz.jpg"
+                                    alt="skroutz.gr"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+                        </div>
+                        <!-- ΠΡΟΣΘΗΚΗ: ΔΙΓΛΩΣΣΟ ΚΟΥΜΠΙ ΓΙΑ ΤΟ ΤΕΧΝΙΚΟ PDF -->
+                        <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                            <!-- Αντικαταστήστε το παρακάτω URL με το πραγματικό link του PDF σας στο Cloudinary -->
+                            <a href="https://www.victronenergy.com/upload/documents/Datasheet-MultiPlus-II-inverter-charger-4k-4k5-6k5-EN-.pdf?_cl=MTsxOzE7UlpMT0k4ZlFIbDRUNVhCamJOYXc1cHVMTk5CMDdRam1pc0pjOURxWkJiOUhjVTNwcmR0eVM2cDdqNGVvR3JpSjs="
+                                target="_blank"
+                                style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                                <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                            </a>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <!-- ΥΛΙΚΟ 2: MPPT CHARGE CONTROLLER -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786269092/victron-smartsolar-mppt-150-45.webp"
+                        class="gallery-trigger"
+                        style="width:100%; height:180px; object-fit:contain; border-radius:6px; border:1px solid var(--border-color); margin-bottom:10px; cursor:pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786269092/victron-smartsolar-mppt-150-45.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786269092/victron-smartsolar-mppt-150-45_2.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786269092/victron-smartsolar-mppt-150-45_3.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            2 Χ SmartSolar MPPT<br>150/45
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">High-efficiency solar charge controller with ultra-fast MPPT
+                            tracking.</span>
+                        <span class="lang-el">Υψηλής απόδοσης ρυθμιστής φόρτισης με εξαιρετικά γρήγορη ανίχνευση
+                            MPPT.</span>
+                    </div>
+
+
+                    <!-- ΕΝΟΤΗΤΑ: ΠΡΟΤΕΙΝΟΜΕΝΑ ΚΑΤΑΣΤΗΜΑΤΑ ΜΕ ΛΟΓΟΤΥΠΑ (WHERE TO BUY) -->
+                    <div
+                        style="margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color); text-align: center;">
+                        <div
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--text-color); margin-bottom: 12px;">
+                            <span class="lang-en">Where to buy:</span>
+                            <span class="lang-el">Προτεινόμενα καταστήματα:</span>
+                        </div>
+
+                        <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                            <!-- Κατάστημα 1:  -->
+                            <a href="https://frenchman-energy.eu/Victron-SmartSolar-MPPT-150-45" target="_blank"
+                                title="frenchman-energy.eu" style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437639/frenchman-energy.jpg"
+                                    alt="frenchman-energy.eu"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+
+                            <!-- Κατάστημα 2: -->
+                            <a href="https://heliosystems.gr/product/victron-smartsolar-mppt-150-45-mc4-12-24-48v-45a/"
+                                target="_blank" title="Skroutz"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786440579/heliosystems.jpg"
+                                    alt="heliosystems"
+                                    style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+
+                            <!-- Κατάστημα 3: skroutz.gr -->
+                            <a href="https://www.skroutz.gr/s/30046881/Victron-Energy-SmartSolar-MPPT-150-45-Rythmistis-Fortisis-48V-45A.html"
+                                target="_blank" title="skroutz.gr"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437929/skroutz.jpg"
+                                    alt="skroutz.gr"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+                        </div>
+                        <!-- 📋 PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 2 -->
+                        <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                            <a href="https://www.victronenergy.com/upload/documents/Datasheet-SmartSolar-charge-controller-MPPT-150-35-&-150-45-EN.pdf"
+                                target="_blank"
+                                style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                                <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ΥΛΙΚΟ 3: CERBO GX CORE -->
+                <div class="vault-item">
+                    <!-- ΑΝΤΙΚΑΤΑΣΤΑΣΗ: Πραγματική φωτογραφία Cerbo GX από το δικό σας Cloudinary account με φίλτρο f_auto,q_auto -->
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786271167/victron-cerbo-gx-mk2-systemueberwachung.webp"
+                        alt="Victron Cerbo GX" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786271167/victron-cerbo-gx-mk2-systemueberwachung.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271200/victron-cerbo-gx-mk2-systemueberwachung_10.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271171/victron-cerbo-gx-mk2-systemueberwachung_6.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271170/victron-cerbo-gx-mk2-systemueberwachung_7.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271169/victron-cerbo-gx-mk2-systemueberwachung_8.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271168/victron-cerbo-gx-mk2-systemueberwachung_9.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271167/victron-cerbo-gx-mk2-systemueberwachung.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271166/victron-cerbo-gx-mk2-systemueberwachung_2.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271165/victron-cerbo-gx-mk2-systemueberwachung_3.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271164/victron-cerbo-gx-mk2-systemueberwachung_4.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271163/victron-cerbo-gx-mk2-systemueberwachung_5.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Victron Cerbo<br>GX Core
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">The system communications brain. Manages real-time data pipes.</span>
+                        <span class="lang-el">Ο εγκέφαλος επικοινωνίας του συστήματος. Διαχειρίζεται τα δεδομένα.</span>
+                    </div>
+
+
+                    <!-- ΕΝΟΤΗΤΑ: ΠΡΟΤΕΙΝΟΜΕΝΑ ΚΑΤΑΣΤΗΜΑΤΑ ΜΕ ΛΟΓΟΤΥΠΑ (WHERE TO BUY) -->
+                    <div
+                        style="margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color); text-align: center;">
+                        <div
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--text-color); margin-bottom: 12px;">
+                            <span class="lang-en">Where to buy:</span>
+                            <span class="lang-el">Προτεινόμενα καταστήματα:</span>
+                        </div>
+
+                        <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                            <!-- Κατάστημα 1:  -->
+                            <a href="https://frenchman-energy.eu/Victron-Cerbo-GX-MK2-Systemueberwachung"
+                                target="_blank" title="frenchman-energy.eu"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437639/frenchman-energy.jpg"
+                                    alt="frenchman-energy.eu"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+
+                            <!-- Κατάστημα 2: -->
+                            <a href="https://heliosystems.gr/product/victron-cerbo-gx-mk2/" target="_blank"
+                                title="Skroutz" style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786440579/heliosystems.jpg"
+                                    alt="heliosystems"
+                                    style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+                        </div>
+                        <!-- Κατάστημα 3: skroutz.gr -->
+                        <a href="https://www.skroutz.gr/search?keyphrase=cerbo" target="_blank" title="skroutz.gr"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437929/skroutz.jpg"
+                                alt="skroutz.gr"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 3 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://www.victronenergy.com/upload/documents/Cerbo_GX/140558-Ekrano_GX__Venus_GX__Cerbo_GX__Cerbo-S_GX_Manual-pdf-en.pdf?_cl=MTsxOzE7UlpMT0k4ZlFIbDRUNVhCamJOYXc1cHVMTk5CMDdRam1pc0pjOURxWkJiOUhjVTNwcmR0eVM2cDdqNGVvR3JpSjs="
+                            target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+
+
+                <!-- ΥΛΙΚΟ 4: Victron Lynx_Distributor -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786271929/victron-lynx-distributor-m10.webp"
+                        alt="Victron Lynx Distributor" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786271929/victron-lynx-distributor-m10.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271927/victron-lynx-distributor-m10_2.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786271925/victron-lynx-distributor-m10_3.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Victron <br>Lynx Distributor (M10)
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">A modular DC busbar with spaces for four DC fuses.</span>
+                        <span class="lang-el">Μπάρα ζυγού DC, με θέσεις για τέσσερις ηλεκτρικές ασφάλειες DC.</span>
+                    </div>
+                    <!-- ΕΝΟΤΗΤΑ: ΠΡΟΤΕΙΝΟΜΕΝΑ ΚΑΤΑΣΤΗΜΑΤΑ ΜΕ ΛΟΓΟΤΥΠΑ (WHERE TO BUY) -->
+                    <div
+                        style="margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color); text-align: center;">
+                        <div
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--text-color); margin-bottom: 12px;">
+                            <span class="lang-en">Where to buy:</span>
+                            <span class="lang-el">Προτεινόμενα καταστήματα:</span>
+                        </div>
+
+                        <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                            <!-- Κατάστημα 1:  -->
+                            <a href="https://frenchman-energy.eu/Victron-Lynx-Distributor-M10" target="_blank"
+                                title="frenchman-energy.eu" style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437639/frenchman-energy.jpg"
+                                    alt="frenchman-energy.eu"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+
+                            <!-- Κατάστημα 2: -->
+                            <a href="https://heliosystems.gr/product/victron-lynx-distributor-m10/" target="_blank"
+                                title="Skroutz" style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786440579/heliosystems.jpg"
+                                    alt="heliosystems"
+                                    style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+
+                            <!-- Κατάστημα 3: skroutz.gr -->
+                            <a href="https://www.skroutz.gr/c/2613/aksesouar-fotovoltaikon.html?keyphrase=victron+lynx+distribu"
+                                target="_blank" title="skroutz.gr"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786437929/skroutz.jpg"
+                                    alt="skroutz.gr"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+                        </div>
+
+                        <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 4 -->
+                        <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                            <a href="https://www.victronenergy.com/upload/documents/Lynx_Distributor/24531-Lynx_Distributor_Manual-pdf-en.pdf?_cl=MTsxOzE7UlpMT0k4ZlFIbDRUNVhCamJOYXc1cHVMTk5CMDdRam1pc0pjOURxWkJiOUhjVTNwcmR0eVM2cDdqNGVvR3JpSjs="
+                                target="_blank"
+                                style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                                <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- ΥΛΙΚΟ 5: Μπαταρια DIY -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786272453/314ah_1.webp"
+                        alt="DIY Battery Bank" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786272453/314ah_1.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786272501/jk_bms1.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786272451/314ah.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786272495/jk_bms.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786272452/jk_150A_v19.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            ESS<br>DIY Battery Bank
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">Energy Storage Stystem, 2X16kwh.</span>
+                        <span class="lang-el">Σύστημα αποθήκευσης ενέργειας 2Χ16kwh.</span>
+                    </div>
+                    <!-- ΕΝΟΤΗΤΑ: ΠΡΟΤΕΙΝΟΜΕΝΑ ΚΑΤΑΣΤΗΜΑΤΑ ΜΕ ΛΟΓΟΤΥΠΑ (WHERE TO BUY) -->
+                    <div
+                        style="margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color); text-align: center;">
+                        <div
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--text-color); margin-bottom: 12px;">
+                            <span class="lang-en">Where to buy:</span>
+                            <span class="lang-el">Προτεινόμενα καταστήματα:</span>
+                        </div>
+
+                        <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                            <!-- Κατάστημα 1:  -->
+                            <a href="https://" target="_blank" title="kkkk.com"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://" alt="kkkk.com"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+                            <!-- Κατάστημα 2: -->
+                            <a href="https://" target="_blank" title="mmmm.com"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://" alt="mmmm.com"
+                                    style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+                            <!-- Κατάστημα 3: llll.com -->
+                            <a href="https://" target="_blank" title="llll.com"
+                                style="display: inline-block; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <img src="https://" alt="llll.com"
+                                    style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                    onmouseover="this.style.filter='grayscale(0)'"
+                                    onmouseout="this.style.filter='grayscale(1)'">
+                            </a>
+                        </div>
+
+                        <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 5 -->
+                        <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                            <a href="https://srikobatteries.com/wp-content/uploads/2023/11/JK-Inverter-BMS-Manual.pdf?srsltid=AfmBOoouJkSwlpaopuzxP3tMf100EofTRaUB8P2zGsRSMAXWit4cb2Nl"
+                                target="_blank"
+                                style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                                <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- ΥΛΙΚΟ 6: Suntech STP245-20/Wd -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786275308/images_99.jpg"
+                        alt="Suntech STP245-20/Wd" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786275308/images_99.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786275213/images_8.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786275208/images_7.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786275209/images_6.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786273499/images_4.jpg">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Suntech<br>STP245-20/Wd
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">PV Panel 245W.</span>
+                        <span class="lang-el">Φ/Β Πάνελ 245W.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 6 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://www.yumpu.com/de/document/read/35205585/suntech-power-stp-245s-20-wd-datenblattpdf-nwcomp-solar/2"
+                            target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- ΥΛΙΚΟ 7: Combiner Boxes -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786275342/images_4_9.jpg"
+                        alt="Combiner Boxes" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786275342/images_4_9.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786274598/images_2.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786274596/images_3.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786274594/images_1.jpg">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            2X Combiner Boxes<br>
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">Parallel PV Panels connection with SPD and fuses.</span>
+                        <span class="lang-el">Σύνδεση παράλληλων γραμμών Φ/Β πάνελ, με αντικεραυνική προστασία και
+                            ασφάλειες.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 7 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="www.wwww.www." target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div <!-- ΥΛΙΚΟ 8: Καλώδια -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786275709/victron-5m-rs485-zu-usb-interface-kabel.webp"
+                        alt="Communication Cables" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786275709/victron-5m-rs485-zu-usb-interface-kabel.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786275627/victron-rj45-utp-kabel-fuer-vebus-vecan-venet-und-ve9bitrs485-kommunikation.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786275491/victron-0-9m-ve-direct-cable-verbindungskabel.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Communication Cables<br>
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">System's total communication component.</span>
+                        <span class="lang-el">Το απαραίτητο υλικό επικοινωνία του υστήματος.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 8 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="www.wwww.www." target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Technical Manual (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ΥΛΙΚΟ 9 -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786276189/victron-5m-rs485-zu-usb-interface-kabel_1.webp"
+                        alt="Energy Meter" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786276189/victron-5m-rs485-zu-usb-interface-kabel_1.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Energy Meter<br>EM540
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">3-Phase Sensor max 65A per phase energy meter.</span>
+                        <span class="lang-el">Τριφασικός μετρητής ενέργεια 65Α μέγιστο ανά φάση.</span>
+                    </div>
+
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 9 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://www.gavazziautomation.com/fileadmin/images/PIM/DATASHEET/ENG/EM540_DS_ENG.pdf"
+                            target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ΥΛΙΚΟ 10 -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786427534/dc6.jpg" alt="DC Cables"
+                        class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786276189/victron-5m-rs485-zu-usb-interface-kabel_1.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786427530/dc7.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786427527/dc8.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786427524/dc3.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786427520/dc2.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786427517/dc1.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786427514/dc4.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            DC Cables<br>
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">DC Cables 6,10,16,50 & 95mm2.</span>
+                        <span class="lang-el">Καλώδια συνεχούς ρεύματος 6,10,16,50 & 95mm2.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 10 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://www.gavaz.pdf" target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Technical Manual (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- ΥΛΙΚΟ 11 -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786429325/ac6.webp" alt="AC Cables"
+                        class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786429325/ac6.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786429341/ac3.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786429337/ac2.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786429333/ac1.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786429329/ac4.webp">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            AC Cables<br>
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">AC Cables 3x6mm2, 3x10mm2, 5x6mm2.</span>
+                        <span class="lang-el">Καλώδια εναλλασόμενου ρεύματος 3x6mm2, 3x10mm2, 5x6mm2.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 11 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://www.gavaz.pdf" target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Technical Manual (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- ΥΛΙΚΟ 12 -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786428080/fer1.jpg"
+                        alt="Cable Lungs & Ferrules" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786428080/fer1.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786428076/lung1.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786428073/lung4.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786428069/lung2.webp,https://res.cloudinary.com/dt0szquq/image/upload/v1786428065/lung3.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786428062/fer3.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786428059/fer2.jpg">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Cable<br>Lungs & Ferrules
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">Lungs & Ferrules.</span>
+                        <span class="lang-el">Κως & Ακροχυτώνια.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 12 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://www.gavaz.pdf" target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Technical Manual (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ΥΛΙΚΟ 13 -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786428626/VESTA_%CE%9C%CE%B5%CF%84%CE%B1%CE%BB%CE%BB%CE%B9%CE%BA%CE%AE_%CE%9D%CF%84%CE%BF%CF%85%CE%BB%CE%AC%CF%80%CE%B1_90%CF%8745%CF%87191cm_42kg__%CE%BC%CE%B5_4_%CE%95%CF%83%CF%89%CF%84%CE%B5%CF%81%CE%B9%CE%BA%CE%AC_%CE%A1%CE%AC%CF%86%CE%B9%CE%B1_%CE%91%CE%BD%CE%B8%CF%81%CE%B1%CE%BA%CE%AF_%CE%9C%CE%B1%CF%84_4.jpg"
+                        alt="Cable Lungs & Ferrules" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786428626/VESTA_%CE%9C%CE%B5%CF%84%CE%B1%CE%BB%CE%BB%CE%B9%CE%BA%CE%AE_%CE%9D%CF%84%CE%BF%CF%85%CE%BB%CE%AC%CF%80%CE%B1_90%CF%8745%CF%87191cm_42kg__%CE%BC%CE%B5_4_%CE%95%CF%83%CF%89%CF%84%CE%B5%CF%81%CE%B9%CE%BA%CE%AC_%CE%A1%CE%AC%CF%86%CE%B9%CE%B1_%CE%91%CE%BD%CE%B8%CF%81%CE%B1%CE%BA%CE%AF_%CE%9C%CE%B1%CF%84_4.jpg">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Outdoor Installation<br>Cabinet
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">Outdoor Installation Cabinet 90x45x191cm.</span>
+                        <span class="lang-el">Φοριαμός Εγκατάστασης 90x45x191cm.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 13 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://www.gavaz.pdf" target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Technical Manual (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- ΥΛΙΚΟ 99 -->
+                <div class="vault-item">
+                    <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1786435134/jinko1.jpg"
+                        alt="Future Updates... PV Panels 500wp" class="gallery-trigger"
+                        style="width: 100%; height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px; background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                        data-images="https://res.cloudinary.com/dt0szquq/image/upload/v1786435134/jinko1.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786435129/jinko2.jpg,https://res.cloudinary.com/dt0szquq/image/upload/v1786435123/jinko3.jpg">
+
+                    <div class="hardware-title-row"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="hardware-name" style="font-size: 1.05em; font-weight: 700; line-height: 1.4;">
+                            Future Updates...<br>PV Panels 500wp
+                        </span>
+                        <a href="https://youtube.com" target="_blank" class="hardware-yt-link"
+                            title="Δείτε το βίντεο παρουσίασης" style="margin-left: 0;">
+                            <svg class="yt-logo" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hardware-caption"
+                        style="text-align: justify; text-justify: inter-word; margin-bottom: 15px; font-size: 0.85em; line-height: 1.5; color: var(--card-text); flex-grow: 1;">
+                        <span class="lang-en">AIKO, JINKO PV Panels 500Wp.</span>
+                        <span class="lang-el">Φωτοβολταικά πάνελ AIKO ή JINKO 500Wp.</span>
+                    </div>
+                    <!-- Οριζόντιο Grid Λογοτύπων με Flexbox, Responsive και αυτόματο Wrap -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+                        <!-- Κατάστημα 1:  -->
+                        <a href="https://" target="_blank" title="kkkk.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="kkkk.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 2: -->
+                        <a href="https://" target="_blank" title="mmmm.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="mmmm.com"
+                                style="height: 22px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                        <!-- Κατάστημα 3: llll.com -->
+                        <a href="https://" target="_blank" title="llll.com"
+                            style="display: inline-block; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <img src="https://" alt="llll.com"
+                                style="height: 25px; width: auto; object-fit: contain; filter: grayscale(1); transition: filter 0.2s;"
+                                onmouseover="this.style.filter='grayscale(0)'"
+                                onmouseout="this.style.filter='grayscale(1)'">
+                        </a>
+                    </div>
+                    <!-- PDF ΓΙΑ ΤΟ ΥΛΙΚΟ 99 -->
+                    <div style="margin-top: auto; padding-top: 5px; text-align: center;">
+                        <a href="https://jinkosolarcdn.shwebspace.com/uploads/JKM525-545N-54QL6-DV-F1-EN.pdf"
+                            target="_blank"
+                            style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <span class="lang-en">View Data Sheet (PDF) ➔</span>
+                            <span class="lang-el">Προβολή Τεχνικού Εγχειριδίου Δεδομένων (PDF) ➔</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <footer style="margin-top: 50px; margin-bottom: 20px; text-align: center; clear: both;">
+        <p
+            style="font-family: 'Segoe UI', 'Montserrat', sans-serif; font-size: 0.9em; font-weight: 600; color: var(--victron-blue) !important; margin: 0; letter-spacing: 0.5px;">
+            &copy; 2026 Pean to Apollo &bull; Mike Voudigaris
+        </p>
+        <div
+            style="font-family: 'Segoe UI', sans-serif; font-size: 0.75em; color: var(--card-text); opacity: 0.8; line-height: 1.5; max-width: 850px; margin: 12px auto 0 auto; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 0 20px;">
+            <span style="text-align: center;">
+                <span class="lang-en">A paean to Apollo is an ancient Greek lyric song of thanksgiving, triumph, or
+                    healing addressed specifically to the god Apollo.</span>
+                <span class="lang-el">Ο παιάνας προς τον Απόλλωνα είναι ένα αρχαίο ελληνικό λυρικό άσμα ευχαριστίας,
+                    θριάμβου ή θεραπείας που απευθύνεται ειδικά στον θεό Απόλλωνα.</span>
+            </span>
+            <a href="https://wikipedia.org" target="_blank"
+                style="font-size: 0.93em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; white-space: nowrap; display: inline-flex; align-items: center; transition: opacity 0.2s;">
+                <span class="lang-en">Read about Paean on Wikipedia ➔</span>
+                <span class="lang-el">Διαβάστε για τον Παιάνα στη Wikipedia ➔</span>
+            </a>
+        </div>
+    </footer>
+
+<script>
+        // 0. Λειτουργία Εναλλαγής Γλώσσας (Toggle Language)
+        function switchLanguage() {
+            let elElements = document.querySelectorAll('.lang-el');
+            let enElements = document.querySelectorAll('.lang-en');
+            let btn = document.getElementById('lang-toggle');
+
+            // Έλεγχος της τρέχουσας κατάστασης (αν τα ελληνικά είναι κρυμμένα)
+            if (btn.innerText === "Ελληνικά") {
+                // Ενεργοποίηση Ελληνικών: Εμφάνιση ελληνικών, απόκρυψη αγγλικών
+                elElements.forEach(el => {
+                    el.style.display = (el.tagName === 'SPAN' || el.tagName === 'STRONG') ? 'inline' : 'block';
+                });
+                enElements.forEach(el => el.style.display = 'none');
+                btn.innerText = "English";
+                document.documentElement.setAttribute("lang", "el");
+            } else {
+                // Ενεργοποίηση Αγγλικών: Εμφάνιση αγγλικών, απόκρυψη ελληνικών
+                elElements.forEach(el => el.style.display = 'none');
+                enElements.forEach(el => {
+                    el.style.display = (el.tagName === 'SPAN' || el.tagName === 'STRONG') ? 'inline' : 'block';
+                });
+                btn.innerText = "Ελληνικά";
+                document.documentElement.setAttribute("lang", "en");
+            }
+        }
+        // 1. Λειτουργία Άνοιγμα / Κλείσιμο Sidebar
+        function toggleNav() {
+            var sidebar = document.getElementById("mySidebar");
+            var body = document.getElementById("pageBody");
+            var btn = document.getElementById("menuBtn");
+
+            sidebar.classList.toggle("open");
+            body.classList.toggle("sidebar-open");
+
+            if (sidebar.classList.contains("open")) {
+                btn.innerHTML = "✕";
+            } else {
+                btn.innerHTML = "☰";
+            }
+        }
+
+        // 2. Διαχείριση Dark Mode Θέματος
+        const themeCheckbox = document.getElementById("themeCheckbox");
+        const currentTheme = localStorage.getItem("apollo_theme") || "light";
+
+        if (currentTheme === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+            themeCheckbox.checked = true;
+        }
+
+        themeCheckbox.addEventListener("change", function () {
+            if (this.checked) {
+                document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("apollo_theme", "dark");
+            } else {
+                document.documentElement.setAttribute("data-theme", "light");
+                localStorage.setItem("apollo_theme", "light");
+            }
+        });
+
+        // 5. Έξυπνη Διαχείριση Πολλαπλών Συλλογών Φωτογραφιών (Dynamic LightBox)
+        let activeGalleryImages = [];
+        let currentDynSlideIndex = 0;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Εντοπισμός όλων των εικόνων υλικών με την κλάση gallery-trigger
+            const triggers = document.querySelectorAll('.gallery-trigger');
+
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function () {
+                    // Διάβασμα των εικόνων από το data-images attribute και μετατροπή σε πίνακα
+                    const imagesAttr = this.getAttribute('data-images');
+                    if (!imagesAttr) return;
+
+                    activeGalleryImages = imagesAttr.split(',').map(img => img.trim());
+                    currentDynSlideIndex = 0; // Ξεκινάμε πάντα από την πρώτη εικόνα
+
+                    openDynamicLightbox();
+                });
+            });
+        });
+
+        function openDynamicLightbox() {
+            if (activeGalleryImages.length === 0) return;
+            document.getElementById("dynamicLightbox").style.display = "block";
+
+            // Αν η συλλογή έχει μόνο 1 εικόνα, κρύβουμε τα βέλη πλοήγησης
+            const prevArrow = document.getElementById("dynLightboxPrev");
+            const nextArrow = document.getElementById("dynLightboxNext");
+            if (activeGalleryImages.length <= 1) {
+                prevArrow.style.display = "none";
+                nextArrow.style.display = "none";
+            } else {
+                prevArrow.style.display = "block";
+                nextArrow.style.display = "block";
+            }
+
+            buildThumbnails();
+            updateDynGalleryView();
+        }
+
+        function closeDynamicLightbox() {
+            document.getElementById("dynamicLightbox").style.display = "none";
+        }
+
+        function changeDynSlide(direction) {
+            currentDynSlideIndex += direction;
+            if (currentDynSlideIndex >= activeGalleryImages.length) currentDynSlideIndex = 0;
+            if (currentDynSlideIndex < 0) currentDynSlideIndex = activeGalleryImages.length - 1;
+            updateDynGalleryView();
+        }
+
+        function setDynSlide(index) {
+            currentDynSlideIndex = index;
+            updateDynGalleryView();
+        }
+
+        // Αυτόματο χτίσιμο των Thumbnails ανάλογα με το υλικό
+        function buildThumbnails() {
+            const thumbsContainer = document.getElementById("dynLightboxThumbs");
+            thumbsContainer.innerHTML = ""; // Καθαρισμός παλιών thumbnails
+
+            // Αν υπάρχει μόνο μία εικόνα, δεν χρειάζεται να δείχνουμε μικρογραφία από κάτω
+            if (activeGalleryImages.length <= 1) return;
+
+            activeGalleryImages.forEach((imgUrl, index) => {
+                const thumbImg = document.createElement("img");
+                thumbImg.src = imgUrl;
+                thumbImg.className = "lightbox-thumb";
+                thumbImg.addEventListener('click', function () {
+                    setDynSlide(index);
+                });
+                thumbsContainer.appendChild(thumbImg);
+            });
+        }
+
+        function updateDynGalleryView() {
+            document.getElementById("dynLightboxMain").src = activeGalleryImages[currentDynSlideIndex];
+            document.getElementById("dynLightboxNum").innerText = (currentDynSlideIndex + 1) + " / " + activeGalleryImages.length;
+
+            // Highlighting του ενεργού thumbnail
+            const thumbs = document.getElementsByClassName("lightbox-thumb");
+            for (let i = 0; i < thumbs.length; i++) {
+                thumbs[i].classList.remove("active-thumb");
+            }
+            if (thumbs[currentDynSlideIndex]) {
+                thumbs[currentDynSlideIndex].classList.add("active-thumb");
+                thumbs[currentDynSlideIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        // Κλείσιμο με το πλήκτρο ESC
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") closeDynamicLightbox();
+        });
+
+    </script>
+
+<script>
+/* sidebar progress: same calculation as the home page */
+(function () {
+    try {
+        var pages = ["phaethons_grid.html", "zeus_switch.html", "flying_dutchman.html", "ariadnes_thread.html", "cronus_vault.html", "argus_vision.html",
+            "daedalus_code.html", "chirons_tests.html", "talos_secure.html", "genesis_spark.html", "themis_audit.html"];
+        var done = 0, total = pages.length * 10;
+        pages.forEach(function (p) {
+            var saved = {};
+            try { saved = JSON.parse(localStorage.getItem("apollo_tasks_" + p)) || {}; } catch (e) { saved = {}; }
+            for (var i = 0; i < 10; i++) if (saved[i] === undefined || saved[i] === true) done++;
+        });
+        var pct = Math.round(done / total * 100);
+        var t = document.getElementById("progressPercentage"), b = document.getElementById("progressBar");
+        if (t) t.innerText = pct + "%";
+        if (b) b.style.width = pct + "%";
+    } catch (e) { /* ignore */ }
+})();
+</script>
+
+<!-- Vercel Web Analytics (επισκέψεις/σελίδες) -->
+<script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+<!-- Vercel Speed Insights (ταχύτητα σελίδας / Core Web Vitals) -->
+<script>
+    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+<div id="dynamicLightbox" class="lightbox-modal">
+  <span class="lightbox-close" onclick="closeDynamicLightbox()">&times;</span>
+  <div class="lightbox-content">
+    <img id="dynLightboxMain" class="lightbox-main-img">
+    <a id="dynLightboxPrev" class="lightbox-prev" onclick="changeDynSlide(-1)">&#10094;</a>
+    <a id="dynLightboxNext" class="lightbox-next" onclick="changeDynSlide(1)">&#10095;</a>
+    <div id="dynLightboxNum" class="lightbox-number"></div>
+    <div id="dynLightboxThumbs" class="lightbox-thumbnails-row"></div>
+  </div>
+</div>
+</body>
+</html>
