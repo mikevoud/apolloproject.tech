@@ -724,27 +724,25 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
 /* Sidebar: long labels wrap instead of being cut off */
 .sidebar a { white-space: normal; line-height: 1.25; }
 
-/* ---- Σελίδες βημάτων ---- */
-.page-wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; }
-.back-link { display: inline-flex; align-items: center; gap: 8px; margin: 28px 0 4px 0; padding: 10px 20px; background: var(--victron-orange); color: #fff !important; text-decoration: none; font-weight: 700; border-radius: 8px; transition: transform 0.2s, box-shadow 0.2s; }
+/* ---- Σελίδες βημάτων (ίδια κουτιά με το index) ---- */
+.vault-title, .progress-card .vault-title { display: flex; align-items: center; }
+.title-icon { width: 1.15em; height: 1.15em; margin-right: 12px; flex-shrink: 0; fill: none; stroke: var(--victron-orange); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.back-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--victron-orange); color: #fff !important; text-decoration: none; font-weight: 700; border-radius: 8px; transition: transform 0.2s, box-shadow 0.2s; }
 .back-link:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.18); text-decoration: none; }
-.container { display: block; max-width: 900px; margin: 20px auto 40px auto; padding: 25px 30px; background: var(--card-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border-color); border-left: 5px solid var(--victron-orange); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); color: var(--card-text); transition: background-color 0.3s, border-color 0.3s; }
-.container h2 { color: var(--victron-blue); margin-top: 0; }
-.container ul + h2, .container p + h2 { margin-top: 28px; }
-.container p { line-height: 1.6; }
-ul { line-height: 1.6; list-style: none; padding-left: 0; }
-li { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
-li:last-child { border-bottom: none; }
+.step-sub { font-size: 1.1em; font-weight: 600; color: var(--victron-orange); margin-bottom: 12px; margin-top: 4px; }
+.step-text { margin: 0; line-height: 1.6; color: var(--card-text); }
+.progress-card ul { line-height: 1.6; list-style: none; padding-left: 0; margin: 14px 0 0 0; }
+.progress-card li { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px dashed var(--border-color); }
+.progress-card li:last-child { margin-bottom: 0; border-bottom: none; }
 .item-row { display: flex; align-items: flex-start; width: 100%; }
-.container input[type="checkbox"] { accent-color: var(--victron-orange); width: 18px; height: 18px; margin-right: 12px; margin-top: 4px; cursor: pointer; flex-shrink: 0; opacity: 1; position: static; }
+.progress-card input[type="checkbox"] { accent-color: var(--victron-orange); width: 18px; height: 18px; margin-right: 12px; margin-top: 4px; cursor: pointer; flex-shrink: 0; opacity: 1; position: static; }
 .item-desc-link { color: var(--victron-blue); text-decoration: none; transition: color 0.2s; font-weight: 500; width: 100%; }
 .item-desc-link:hover { color: var(--victron-orange); text-decoration: underline; }
 .yt-logo { width: 20px; height: 20px; fill: #ff0000; margin-left: 6px; vertical-align: middle; display: inline-block; flex-shrink: 0; }
 .item-desc-plain { color: var(--text-color); font-weight: 500; }
 .local-photo { display: block; max-width: 100%; height: auto; max-height: 250px; border-radius: 8px; margin-top: 12px; margin-left: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
-.spec-box { background: rgba(128,128,128,0.10); padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.95em; border-left: 3px solid var(--victron-blue); color: var(--text-color); }
+.spec-box { background: rgba(128,128,128,0.08); padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.95em; border-left: 3px solid var(--victron-blue); color: var(--card-text); line-height: 1.6; }
 .spec-box strong { color: var(--victron-orange); }
-
     </style>
 </head>
 <body id="pageBody">
@@ -934,15 +932,21 @@ li:last-child { border-bottom: none; }
         </div>
     </header>
 
-    <div class="page-wrap">
+    <div class="progress-section" style="margin-top: 30px; margin-bottom: 0;">
         <a href="index.html" class="back-link"><span class="lang-en">← Back to Dashboard</span><span class="lang-el">← Επιστροφή στο Dashboard</span></a>
     </div>
-    <div class="container">
-        <h2><span class="lang-en">Scope of Work</span><span class="lang-el">Πεδίο Εργασιών</span></h2>
-        <p><span class="lang-en">Construction & installation of the air-floating enclosure with active thermal ventilation for the Victron MultiPlus-II, MPPTs, and main batteries.</span><span class="lang-el">Κατασκευή & εγκατάσταση της αερόφερτης θήκης με ενεργό θερμικό αερισμό για το Victron MultiPlus-II, τους MPPT και τις κύριες μπαταρίες.</span></p>
-        
-        <h2><span class="lang-en">Installation Checklist</span><span class="lang-el">Λίστα Εγκατάστασης</span></h2>
-        <ul>
+
+    <div class="progress-section" style="margin-top: 20px; margin-bottom: 0;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-blue);">
+            <div class="vault-title"><svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M8 12h8M8 16h5"/></svg><span class="lang-en">Scope of Work</span><span class="lang-el">Πεδίο Εργασιών</span></div>
+            <p class="step-text" style="margin-top: 10px;"><span class="lang-en">Construction & installation of the air-floating enclosure with active thermal ventilation for the Victron MultiPlus-II, MPPTs, and main batteries.</span><span class="lang-el">Κατασκευή & εγκατάσταση της αερόφερτης θήκης με ενεργό θερμικό αερισμό για το Victron MultiPlus-II, τους MPPT και τις κύριες μπαταρίες.</span></p>
+        </div>
+    </div>
+
+    <div class="progress-section" style="margin-top: 20px; margin-bottom: 40px;">
+        <div class="progress-card" style="border-left: 5px solid var(--victron-orange);">
+            <div class="vault-title"><svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/></svg><span class="lang-en">Installation Checklist</span><span class="lang-el">Λίστα Εγκατάστασης</span></div>
+            <ul>
         <li data-index="0">
             <div class="item-row">
                 <input type="checkbox" checked> 
@@ -1012,11 +1016,11 @@ li:last-child { border-bottom: none; }
             </div>
         </li>
     </ul>
-    
-    <div class="spec-box">
+            <div class="spec-box">
         <strong><span class="lang-en">Engineering Notes: I am an amateur handyman and anything I do is under my responsibility. I strongly recommend: Do not try this at home!!!</span><span class="lang-el">Τεχνικές Σημειώσεις: Είμαι ερασιτέχνης τεχνικός και ό,τι κάνω γίνεται με δική μου ευθύνη. Συνιστώ ανεπιφύλακτα: Μην το δοκιμάσετε στο σπίτι σας!!!</span></strong>
     </div>
-</div>
+        </div>
+    </div>
 
     <script>
         function switchLanguage() {
@@ -1081,7 +1085,7 @@ li:last-child { border-bottom: none; }
             const pageName = window.location.pathname.split("/").pop() || "flying_dutchman.html";
             const key = "apollo_tasks_" + (PAGES.includes(pageName) ? pageName : "flying_dutchman.html");
             const states = readStates(key.replace("apollo_tasks_", ""));
-            document.querySelectorAll(".container ul li").forEach(function (li) {
+            document.querySelectorAll(".progress-card ul li").forEach(function (li) {
                 const i = li.getAttribute("data-index");
                 const cb = li.querySelector("input[type='checkbox']");
                 if (!cb) return;
