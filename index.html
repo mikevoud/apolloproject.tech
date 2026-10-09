@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 
 <head>
     <meta charset="UTF-8">
@@ -474,7 +474,7 @@
 }
 
         /* ΣΤΥΛ ΓΙΑ ΤΗ ΔΙΠΛΗ ΓΛΩΣΣΑ */
-        .lang-el {
+        .lang-en {
             display: none;
         }
 
@@ -991,34 +991,9 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
 
 <body id="pageBody">
 
+    <button class="menu-btn" id="menuBtn" onclick="toggleNav()" aria-label="Menu">☰</button>
+
     <div id="mySidebar" class="sidebar">
-                <!-- ADVERTISEMENT -->
-        <div
-            style="padding: 10px 20px 20px 20px; flex-grow: 1; display: flex; flex-direction: column; box-sizing: border-box;">
-            <a href="https://victronenergy.com" target="_blank"
-                style="background: rgba(56, 189, 248, 0.04); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px dashed #38bdf8; border-radius: 8px; padding: 25px 10px; text-align: center; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; cursor: pointer; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;"
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.background='rgba(56, 189, 248, 0.07)'; this.style.boxShadow='0 4px 12px rgba(56, 189, 248, 0.1)';"
-                onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(56, 189, 248, 0.04)'; this.style.boxShadow='none';">
-                <svg viewBox="0 0 24 24"
-                    style="width: 32px; height: 32px; fill: none; stroke: #38bdf8; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; margin-bottom: 8px;">
-                    <rect x="2" y="2" width="20" height="20" rx="2" />
-                    <path d="M7 8h10M7 12h10M7 16h6" />
-                </svg>
-                <div
-                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.75em; font-weight: 700; color: #38bdf8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
-                    <span class="lang-en">Advertisement Gateway</span><span class="lang-el">Πύλη Διαφήμισης</span>
-                </div>
-                <div
-                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.9em; color: #ffffff !important; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px;">
-                    <span class="lang-en">Advertisement</span><span class="lang-el">Διαφήμιση</span>
-                </div>
-                <div
-                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; color: #e2e8f0 !important; opacity: 0.85; font-weight: 500; line-height: 1.4; max-width: 200px;">
-                    <span class="lang-en">Premium off-grid power systems.</span><span class="lang-el">Premium συστήματα
-                        αυτόνομης ισχύος.</span>
-                </div>
-            </a>
-        </div>
         <div class="sidebar-title">
             <span class="lang-en">Project Map</span>
             <span class="lang-el">Χάρτης Έργου</span>
@@ -1076,7 +1051,7 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
                     stroke-width="1.8" />
             </svg>
             <span class="lang-en">-Ariadne’s Thread</span>
-            <span class="lang-el">-Μήτος της Αριάδνης</span>
+            <span class="lang-el">-Μίτος της Αριάδνης</span>
         </a>
         <a href="cronus_vault.html">
             <svg class="sidebar-logo" viewBox="0 0 24 24">
@@ -1111,7 +1086,7 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
                 <path d="M2 17h20M6 21h12M12 17v4M6 10l3-3 4 6 2-3h3" />
             </svg>
             <span class="lang-en">-Chiron’s Tests</span>
-            <span class="lang-el">-Μυαλό του Χείρων</span>
+            <span class="lang-el">-Δοκιμές του Χείρωνα</span>
         </a>
         <a href="talos_secure.html">
             <svg class="sidebar-logo" viewBox="0 0 24 24">
@@ -1128,7 +1103,7 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
                 <circle cx="12" cy="12" r="1" fill="currentColor" />
             </svg>
             <span class="lang-en">-Genesis Spark</span>
-            <span class="lang-el">-Σπίθα της Γένεσις</span>
+            <span class="lang-el">-Σπίθα της Γένεσης</span>
         </a>
         <a href="themis_audit.html">
             <svg class="sidebar-logo" viewBox="0 0 24 24">
@@ -1158,13 +1133,39 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
             </div>
         </div>
 
-
+                <!-- ADVERTISEMENT -->
+        <div
+            style="padding: 10px 20px 20px 20px; flex-grow: 1; display: flex; flex-direction: column; box-sizing: border-box;">
+            <a href="https://victronenergy.com" target="_blank"
+                style="background: rgba(56, 189, 248, 0.04); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px dashed #38bdf8; border-radius: 8px; padding: 25px 10px; text-align: center; box-sizing: border-box; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; cursor: pointer; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.background='rgba(56, 189, 248, 0.07)'; this.style.boxShadow='0 4px 12px rgba(56, 189, 248, 0.1)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(56, 189, 248, 0.04)'; this.style.boxShadow='none';">
+                <svg viewBox="0 0 24 24"
+                    style="width: 32px; height: 32px; fill: none; stroke: #38bdf8; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; margin-bottom: 8px;">
+                    <rect x="2" y="2" width="20" height="20" rx="2" />
+                    <path d="M7 8h10M7 12h10M7 16h6" />
+                </svg>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.75em; font-weight: 700; color: #38bdf8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
+                    <span class="lang-en">Advertisement Gateway</span><span class="lang-el">Πύλη Διαφήμισης</span>
+                </div>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.9em; color: #ffffff !important; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px;">
+                    <span class="lang-en">Advertisement</span><span class="lang-el">Διαφήμιση</span>
+                </div>
+                <div
+                    style="font-family: 'Segoe UI', sans-serif; font-size: 0.8em; color: #e2e8f0 !important; opacity: 0.85; font-weight: 500; line-height: 1.4; max-width: 200px;">
+                    <span class="lang-en">Premium off-grid power systems.</span><span class="lang-el">Premium συστήματα
+                        αυτόνομης ισχύος.</span>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- ΔΙΟΡΘΩΜΕΝΟΣ HEADER ΜΕ ΤΟ DARK MODE ΚΑΤΩ ΔΕΞΙΑ -->
     <header>
         <!-- 1. ΠΡΟΣΘΕΤΕΤΕ ΤΟ ΚΟΥΜΠΙ ΤΗΣ ΓΛΩΣΣΑΣ ΕΔΩ -->
-        <button id="lang-toggle" class="lang-btn" onclick="switchLanguage()">Ελληνικά</button>
+        <button id="lang-toggle" class="lang-btn" onclick="switchLanguage()">English</button>
 
         <h1>Apollo Project</h1>
         <p>
@@ -1378,8 +1379,8 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
                     There is limited sunshine, especially in winter, meaning the panels will primarily capture diffuse light. There is also a constraint regarding the available installation space: a rooftop storage shed roof with an East-West orientation and a fixed pitch.
                     So, to calculate at least the system's monthly output, I created a calculation tool that accounts for the site's obstructions. It might be useful for you, too!
                     Enter your PV fields (power, direction, tilt) and the buildings around them (height, distance) to calculate the shading and the energy produced for every month, with a yearly total.</span>
-                <span class="lang-el">Κατά τον σχεδιασμό γνώριζα ότι έχω να αντιμετωπίσω μία πολύ μεγάλη πρόκληση: Η εγκατάσταση των πάνελ γίνεται σε ισόγεια κατοικία εμτός αστικού περιβάλλοντος, με πολυκατοικίες να την περιστοιχίζουν περιμετρικά.
-                    Η ηλιοφάνεια μικρή, ειδικά τον χειμώνα, γεγονός που σημαίνει ότι τα πάνελ θα μαζεύουν κθρίως διάχυτο φως. Επίσης υπάρχει άλλη μία δέσμευση, καθώς ο διαθέσιμος χώρος τοποθέτησης αφορά μία σκεπή αποθήκης στην ταράτσα με προσανατολισμό Α-Δ και προκαθοριμένη κλίση.
+                <span class="lang-el">Κατά τον σχεδιασμό γνώριζα ότι έχω να αντιμετωπίσω μία πολύ μεγάλη πρόκληση: Η εγκατάσταση των πάνελ γίνεται σε ισόγεια κατοικία εκτός αστικού περιβάλλοντος, με πολυκατοικίες να την περιστοιχίζουν περιμετρικά.
+                    Η ηλιοφάνεια μικρή, ειδικά τον χειμώνα, γεγονός που σημαίνει ότι τα πάνελ θα μαζεύουν κυρίως διάχυτο φως. Επίσης υπάρχει άλλη μία δέσμευση, καθώς ο διαθέσιμος χώρος τοποθέτησης αφορά μία σκεπή αποθήκης στην ταράτσα με προσανατολισμό Α-Δ και προκαθορισμένη κλίση.
                     Συνεπώς για να μπορέσω να υπολογισω την μηνιαία τουλάχιστον παραγωγή του συστήματος έφτιαξα ένα εργαλείο υπολογισμού σύμφωνα με τα εμπόδια του χώρου. Ίσως να είναι χρήσιμο και για εσένα!
                     Εισάγετε τα πεδία Φ/Β (ισχύς, κατεύθυνση, κλίση) και τα κτίρια γύρω τους (ύψος, απόσταση) για να υπολογίσετε τη σκίαση και την παραγόμενη ενέργεια ανά μήνα, με ετήσιο σύνολο.</span>
             </p>
@@ -1426,7 +1427,7 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
                 <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_poly.png"
                     target="_blank" style="display: block; width: 100%; height: 100%; text-align: center;">
                     <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_poly.png"
-                        alt="System Architecture Diagram"
+                        alt="Victron Click &amp; Design System schematic"
                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; cursor: pointer; transition: opacity 0.2s;"
                         onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
                 </a>
@@ -1449,7 +1450,7 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
                 <a href="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_mono.png"
                     target="_blank" style="display: block; width: 100%; height: 100%; text-align: center;">
                     <img src="https://res.cloudinary.com/dt0szquq/image/upload/v1791445090/Apollo_sheet1_preview_mono.png"
-                        alt="System Architecture Diagram"
+                        alt="System Integration Steps diagram"
                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; cursor: pointer; transition: opacity 0.2s;"
                         onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
                 </a>
@@ -1812,7 +1813,7 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
                 <span class="lang-el">Ο παιάνας προς τον Απόλλωνα είναι ένα αρχαίο ελληνικό λυρικό άσμα ευχαριστίας,
                     θριάμβου ή θεραπείας που απευθύνεται ειδικά στον θεό Απόλλωνα.</span>
             </span>
-            <a href="https://wikipedia.org" target="_blank"
+            <a href="https://en.wikipedia.org/wiki/Paean" target="_blank"
                 style="font-size: 0.93em; font-weight: 700; color: var(--victron-orange) !important; text-decoration: none; letter-spacing: 0.3px; white-space: nowrap; display: inline-flex; align-items: center; transition: opacity 0.2s;">
                 <span class="lang-en">Read about Paean on Wikipedia ➔</span>
                 <span class="lang-el">Διαβάστε για τον Παιάνα στη Wikipedia ➔</span>
@@ -1875,6 +1876,7 @@ header p { font-size: clamp(1.1rem, 2.4vw, 1.8rem); }
             var sidebar = document.getElementById("mySidebar");
             var body = document.getElementById("pageBody");
             var btn = document.getElementById("menuBtn");
+            if (!sidebar || !btn) return;
 
             sidebar.classList.toggle("open");
             body.classList.toggle("sidebar-open");
@@ -2387,8 +2389,8 @@ const SITE_LON = 23.63;            // γεωγραφικό μήκος της ε�
 // (Μοντέλο: Πειραιάς, 9 x STP245 Ανατολικά κλίση 20% + 12 x STP245 Δυτικά κλίση 15%.
 //  Γύρω κτίρια: Δ 15 μ. σε 1 μ., Β 19 μ. σε 1 μ., Α ~17 μ. σε 15 μ., Ν 19 μ. σε 30 μ.)
 const PV_ARRAYS = [
-    { name: 'West', el: 'West', peakEn: 'afternoon', peakEl: 'απόγευμα', kwp: 2.940, f: [0.32, 0.35, 0.35, 0.33, 0.31, 0.30, 0.29, 0.31, 0.32, 0.34, 0.34, 0.25] },
-    { name: 'East', el: 'East', peakEn: 'morning', peakEl: 'πρωί', kwp: 2.205, f: [0.31, 0.39, 0.41, 0.39, 0.38, 0.36, 0.37, 0.37, 0.38, 0.38, 0.35, 0.25] }
+    { name: 'West', el: 'Δυτικά', peakEn: 'afternoon', peakEl: 'απόγευμα', kwp: 2.940, f: [0.22, 0.34, 0.35, 0.34, 0.32, 0.30, 0.30, 0.32, 0.33, 0.34, 0.30, 0.11] },
+    { name: 'East', el: 'Ανατολικά', peakEn: 'morning', peakEl: 'πρωί', kwp: 2.205, f: [0.22, 0.36, 0.38, 0.38, 0.37, 0.35, 0.35, 0.36, 0.37, 0.36, 0.30, 0.11] }
 ];
 // Διόρθωση από πραγματικές μετρήσεις: μετά από 1-2 εβδομάδες βάλτε  (πραγματική παραγωγή VRM) / (εκτίμηση της σελίδας)
 const PV_CALIBRATION = 1.0;
@@ -2457,7 +2459,7 @@ function renderWeather(d, lang) {
         PV_ARRAYS.forEach(function (a, k) {
             const v = day.fields[k];
             total += v;
-            const cls = k === 0 ? 'east' : 'west';
+            const cls = a.name === 'East' ? 'east' : 'west';
             const name = en ? a.name : a.el;
             const peak = en ? a.peakEn : a.peakEl;
             rows += '<div class="wx-field">'
